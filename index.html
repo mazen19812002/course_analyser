@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحليل الاحتياجات التدريبية - معهد كفر الشيخ العالي للهندسة والتكنولوجيا</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Cairo & Tajawal) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js for Dynamic Visual Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Tailwind Config to set default Arabic font -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Cairo', 'Tajawal', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.4);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.6);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-input:focus {
+            border-color: rgba(59, 130, 246, 1);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+            outline: none;
+        }
+
+        /* Footer Gradient Scrolling Animation */
+        @keyframes gradient-scroll {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animated-footer-bar {
+            background: linear-gradient(270deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #3b82f6);
+            background-size: 1200% 1200%;
+            animation: gradient-scroll 20s ease infinite;
+        }
+
+        /* Card Scale Transitions */
+        .interactive-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .interactive-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -10px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-tr from-sky-100 via-indigo-50 to-emerald-50 min-h-screen flex flex-col font-sans text-slate-800 transition-all duration-300" id="main-body" style="font-size: 16px;">
+
+    <!-- LOADING OVERLAY -->
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white hidden transition-opacity duration-300">
+        <div class="bg-slate-900/90 p-8 rounded-3xl flex flex-col items-center gap-4 max-w-sm text-center shadow-2xl border border-slate-700">
+            <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <h3 class="font-bold text-lg mt-2" id="loading-title">جاري جلب البيانات من Google Sheets</h3>
+            <p class="text-xs text-slate-400" id="loading-desc">يرجى الانتظار لحين جلب البيانات وتحديث النماذج تلقائياً...</p>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="toast-container" class="fixed bottom-20 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- TOP SYSTEM CONTROLS (Floating Zoom & Fullscreen) -->
+    <div class="fixed top-4 left-4 z-40 flex items-center gap-2 bg-white/90 p-2 rounded-full shadow-lg border border-slate-200">
+        <button onclick="changeZoom(-0.05)" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition text-slate-700" title="تصغير الخط">
+            <i class="fa-solid fa-minus text-sm"></i>
+        </button>
+        <button onclick="resetZoom()" class="px-2 text-xs font-semibold text-slate-500 hover:text-slate-800" id="zoom-label">100%</button>
+        <button onclick="changeZoom(0.05)" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition text-slate-700" title="تكبير الخط">
+            <i class="fa-solid fa-plus text-sm"></i>
+        </button>
+        <div class="h-5 w-[1px] bg-slate-300 mx-1"></div>
+        <button onclick="toggleFullScreen()" class="w-9 h-9 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition" title="ملء الشاشة">
+            <i class="fa-solid fa-expand" id="fullscreen-icon"></i>
+        </button>
+    </div>
+
+    <!-- MAIN APP WRAPPER -->
+    <div class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 md:px-8 flex flex-col gap-6">
+        
+        <!-- HEADER SECTION -->
+        <header class="glass-panel rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border-b-4 border-blue-500 relative overflow-hidden">
+            <!-- Decorative Light-beams -->
+            <div class="absolute -right-20 -top-20 w-60 h-60 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-20 -bottom-20 w-60 h-60 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex items-center gap-5">
+                <div class="w-16 h-16 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl shadow-md">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-900">
+                        المعهد العالي للهندسة والتكنولوجيا بكفر الشيخ
+                    </h1>
+                    <div class="flex flex-wrap items-center gap-2 mt-1">
+                        <p class="text-sm md:text-base font-semibold text-emerald-600 flex items-center gap-1">
+                            <i class="fa-solid fa-chart-line"></i>
+                            منظومة تحليل وفلترة الاحتياجات التدريبية الذكية (خطة 2026-2029)
+                        </p>
+                        <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">متصل مباشر بـ Google Sheets</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fast Stats / Sync Button -->
+            <div class="flex flex-wrap items-center gap-3">
+                <button onclick="fetchFromGoogleSheets()" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold rounded-xl shadow-md hover:scale-105 transition duration-200 flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>تحديث البيانات المباشرة</span>
+                </button>
+                <a href="https://docs.google.com/spreadsheets/d/10pLfzze0lP39S_tb1s_-KcO0biXDTmFCmZ6DAKYBFP4/edit?usp=sharing" target="_blank" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition flex items-center gap-1.5" title="رابط شيت البيانات">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    <span>فتح الشيت الأصلي</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- GLOBAL STATS OVERVIEW -->
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="global-stats-grid">
+            <!-- Faculty Stat Card -->
+            <div class="glass-panel rounded-2xl p-4 flex items-center justify-between border-r-4 border-blue-500 interactive-card">
+                <div>
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">هيئة التدريس</span>
+                    <span class="text-2xl font-black text-slate-800" id="stat-faculty-count">0</span>
+                    <span class="text-xs text-slate-400 block mt-1">مشارك بالاستبيان</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 text-xl">
+                    <i class="fa-solid fa-chalkboard-teacher"></i>
+                </div>
+            </div>
+
+            <!-- Supporting Staff Card -->
+            <div class="glass-panel rounded-2xl p-4 flex items-center justify-between border-r-4 border-indigo-500 interactive-card">
+                <div>
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">الهيئة المعاونة</span>
+                    <span class="text-2xl font-black text-slate-800" id="stat-support-count">0</span>
+                    <span class="text-xs text-slate-400 block mt-1">مشارك بالاستبيان</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 text-xl">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+            </div>
+
+            <!-- Administrative Stat Card -->
+            <div class="glass-panel rounded-2xl p-4 flex items-center justify-between border-r-4 border-emerald-500 interactive-card">
+                <div>
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">الجهاز الإداري</span>
+                    <span class="text-2xl font-black text-slate-800" id="stat-admin-count">0</span>
+                    <span class="text-xs text-slate-400 block mt-1">مشارك بالاستبيان</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 text-xl">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- CORE INTERACTIVE ANALYZER PANEL -->
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- SELECTORS SIDEBAR (Controls & Filtering) -->
+            <section class="lg:col-span-4 flex flex-col gap-6" id="controls-sidebar">
+                <div class="glass-panel rounded-3xl p-6 flex flex-col gap-5 border border-white/60">
+                    <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <i class="fa-solid fa-sliders text-blue-600 text-lg"></i>
+                        <h2 class="text-lg font-bold text-slate-800">تصفية واختيار البيانات</h2>
+                    </div>
+
+                    <!-- STEP 1: Select Category (الفئة) -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-600 flex items-center gap-1.5">
+                            <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white text-xs">١</span>
+                            اختر الفئة المستهدفة:
+                        </label>
+                        <div class="grid grid-cols-1 gap-2 mt-1">
+                            <!-- Category: Faculty -->
+                            <button onclick="setCategory(1)" id="cat-btn-1" class="flex items-center gap-3 p-3.5 rounded-xl border-2 text-right transition-all font-semibold glass-input">
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center text-sm" id="cat-icon-1">
+                                    <i class="fa-solid fa-chalkboard-teacher"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="text-sm font-bold">أعضاء هيئة التدريس</div>
+                                    <div class="text-xs font-medium text-slate-400" id="cat-count-lbl-1">تحميل...</div>
+                                </div>
+                            </button>
+                            <!-- Category: Supporting -->
+                            <button onclick="setCategory(2)" id="cat-btn-2" class="flex items-center gap-3 p-3.5 rounded-xl border-2 text-right transition-all font-semibold glass-input">
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center text-sm" id="cat-icon-2">
+                                    <i class="fa-solid fa-user-graduate"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="text-sm font-bold">الهيئة المعاونة</div>
+                                    <div class="text-xs font-medium text-slate-400" id="cat-count-lbl-2">تحميل...</div>
+                                </div>
+                            </button>
+                            <!-- Category: Admin -->
+                            <button onclick="setCategory(3)" id="cat-btn-3" class="flex items-center gap-3 p-3.5 rounded-xl border-2 text-right transition-all font-semibold glass-input">
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center text-sm" id="cat-icon-3">
+                                    <i class="fa-solid fa-user-tie"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="text-sm font-bold">الجهاز الإداري والمكتبي</div>
+                                    <div class="text-xs font-medium text-slate-400" id="cat-count-lbl-3">تحميل...</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: Choose Group or Individual (نوع التحليل) -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-600 flex items-center gap-1.5">
+                            <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white text-xs">٢</span>
+                            طريقة التحليل المطلوبة:
+                        </label>
+                        <div class="grid grid-cols-2 gap-2 mt-1 bg-slate-100 p-1.5 rounded-xl">
+                            <button onclick="setAnalysisType('group')" id="analysis-btn-group" class="py-2.5 rounded-lg text-center text-sm font-bold transition duration-200">
+                                <i class="fa-solid fa-users-viewfinder ml-1"></i>
+                                تحليل جماعي
+                            </button>
+                            <button onclick="setAnalysisType('individual')" id="analysis-btn-individual" class="py-2.5 rounded-lg text-center text-sm font-bold transition duration-200">
+                                <i class="fa-solid fa-user-check ml-1"></i>
+                                تحليل فردي
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: Dynamic Selection (Department vs. Name) -->
+                    <div class="flex flex-col gap-2" id="dynamic-selection-container">
+                        <label class="text-sm font-bold text-slate-600 flex items-center gap-1.5" id="dynamic-select-label">
+                            <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white text-xs">٣</span>
+                            اختر القسم / الإدارة:
+                        </label>
+                        
+                        <!-- Collective Selection Input -->
+                        <div id="selection-group-wrapper" class="relative mt-1">
+                            <select id="group-select" onchange="onGroupSelectChange()" class="w-full p-3.5 glass-input rounded-xl text-sm font-bold text-slate-700 appearance-none">
+                                <!-- Dynamically populated -->
+                            </select>
+                            <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                        </div>
+
+                        <!-- Individual Selection Input with Search Auto-complete -->
+                        <div id="selection-individual-wrapper" class="relative mt-1 hidden flex flex-col gap-2">
+                            <div class="relative">
+                                <input type="text" id="individual-search" oninput="filterNames()" placeholder="اكتب للبحث في قائمة الأسماء..." class="w-full p-3.5 glass-input rounded-xl text-sm font-bold pl-10 pr-4">
+                                <div class="absolute inset-y-0 left-3.5 flex items-center text-slate-400">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </div>
+                            </div>
+                            <select id="individual-select" onchange="onIndividualSelectChange()" size="5" class="w-full p-2 glass-input rounded-xl text-sm font-semibold text-slate-700 max-h-40 overflow-y-auto">
+                                <!-- Dynamically populated list of names -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Help Card -->
+                <div class="glass-panel rounded-3xl p-5 border border-emerald-200/50 bg-gradient-to-br from-emerald-50/40 to-sky-50/40">
+                    <h3 class="font-bold text-emerald-800 flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-circle-info text-base"></i>
+                        كيف يعمل النظام؟
+                    </h3>
+                    <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                        يقوم التطبيق بجلب البيانات المحدثة مباشرة من شيت جوجل، ثم يقوم بفصل البيانات تلقائياً وفهرستها. عند اختيار <strong class="text-slate-800">"التحليل الجماعي"</strong>، يقوم النظام بحساب التكرارات والنسب المئوية لكل دورة تدريبية داخل القسم لتقدير الأكثر احتياجاً. عند اختيار <strong class="text-slate-800">"التحليل الفردي"</strong>، يتم استعراض بطاقة تدريبية كاملة للموظف مع الدورات والمهارات التي اقترحها يدوياً من العمود E.
+                    </p>
+                </div>
+            </section>
+
+            <!-- MAIN RESULTS DASHBOARD AREA -->
+            <section class="lg:col-span-8 flex flex-col gap-6" id="dashboard-results">
+                
+                <!-- EMPTY / WELCOME STATE -->
+                <div id="empty-state" class="glass-panel rounded-3xl p-12 text-center flex flex-col items-center justify-center gap-4 border-2 border-dashed border-slate-300">
+                    <div class="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-3xl">
+                        <i class="fa-solid fa-chart-pie animate-pulse"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-700">الاستبيان جاهز للتحليل المباشر!</h3>
+                    <p class="text-slate-500 max-w-md text-sm">
+                        الرجاء تحديد الفئة المستهدفة ونوع التحليل المناسب لتتمكن من عرض الرسوم البيانية والجداول الإحصائية للأقسام والأفراد فوراً استناداً لبيانات Google Sheets.
+                    </p>
+                </div>
+
+                <!-- ACTIVE ANALYSIS BOARD -->
+                <div id="active-analysis-board" class="hidden flex flex-col gap-6">
+                    
+                    <!-- SUMMARY STATS BAR -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden flex flex-col justify-between h-32">
+                            <div class="absolute -right-5 -bottom-5 text-8xl text-white/10 pointer-events-none">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-blue-100 block" id="summary-stat-1-title">المشمولين بالتحليل</span>
+                            <span class="text-4xl font-black mt-2" id="summary-stat-1-val">0</span>
+                            <span class="text-xs text-indigo-100 block mt-1" id="summary-stat-1-desc">مستجيب في هذا القسم</span>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden flex flex-col justify-between h-32">
+                            <div class="absolute -right-5 -bottom-5 text-8xl text-white/10 pointer-events-none">
+                                <i class="fa-solid fa-list-check"></i>
+                            </div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-100 block" id="summary-stat-2-title">إجمالي الرغبات المطلوبة</span>
+                            <span class="text-4xl font-black mt-2" id="summary-stat-2-val">0</span>
+                            <span class="text-xs text-emerald-100 block mt-1" id="summary-stat-2-desc">طلب تدريبي إجمالي</span>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden flex flex-col justify-between h-32">
+                            <div class="absolute -right-5 -bottom-5 text-8xl text-white/10 pointer-events-none">
+                                <i class="fa-solid fa-award"></i>
+                            </div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-amber-100 block" id="summary-stat-3-title">الاحتياج الأكثر إلحاحاً</span>
+                            <span class="text-base font-bold mt-2 truncate max-w-full block" id="summary-stat-3-val">لا يوجد</span>
+                            <span class="text-xs text-amber-100 block mt-1" id="summary-stat-3-desc">بأعلى نسبة تكرار</span>
+                        </div>
+                    </div>
+
+                    <!-- CHART AND GRAPHICAL REPRESENTATION -->
+                    <div class="glass-panel rounded-3xl p-6 flex flex-col gap-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-chart-column text-indigo-600 text-lg"></i>
+                                <h3 class="font-bold text-slate-800 text-base" id="chart-section-title">مستويات الطلب البياني للدورات المقترحة</h3>
+                            </div>
+                            <!-- Chart Controls -->
+                            <div class="flex items-center gap-1.5" id="chart-controls-box">
+                                <button onclick="changeChartType('bar')" id="chart-type-bar" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                    <i class="fa-solid fa-chart-bar"></i> أفقي
+                                </button>
+                                <button onclick="changeChartType('line')" id="chart-type-line" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                    <i class="fa-solid fa-chart-line"></i> خطي
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="relative w-full h-[320px] md:h-[380px] p-2">
+                            <canvas id="analytics-canvas-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- DETAILED LISTS & TABLES -->
+                    <div class="glass-panel rounded-3xl p-6 flex flex-col gap-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-table-list text-emerald-600 text-lg"></i>
+                                <h3 class="font-bold text-slate-800 text-base" id="table-section-title">تفاصيل الاحتياجات التدريبية</h3>
+                            </div>
+                            <!-- Export Button -->
+                            <button onclick="exportToCSV()" class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-lg text-xs shadow transition duration-200 flex items-center gap-1.5 self-start">
+                                <i class="fa-solid fa-file-excel"></i>
+                                <span>تصدير البيانات التدريبية (CSV)</span>
+                            </button>
+                        </div>
+
+                        <!-- Table Area (Dynamically Rendered based on context) -->
+                        <div class="overflow-x-auto w-full rounded-xl border border-slate-100" id="data-table-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- NESTED INDIVIDUAL MEMBERS LIST (GROUP MODE ONLY) -->
+                    <div class="glass-panel rounded-3xl p-6 flex flex-col gap-4" id="nested-members-panel">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3 cursor-pointer" onclick="toggleMembersCollapse()">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-user-tag text-blue-600 text-lg"></i>
+                                <h3 class="font-bold text-slate-800 text-base">أسماء ومشاركات منتسبي هذا القسم</h3>
+                            </div>
+                            <span class="text-slate-400 hover:text-slate-700 transition" id="members-collapse-btn">
+                                <i class="fa-solid fa-chevron-up text-sm"></i>
+                            </span>
+                        </div>
+                        <div id="members-list-content" class="grid grid-cols-1 md:grid-cols-2 gap-3 transition-all duration-300">
+                            <!-- Populated with mini cards of users and their choices -->
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- GLOBAL PREMIUM FOOTER WITH GRADIENT PROGRESS BAR -->
+    <footer class="mt-auto w-full">
+        <!-- Thin Animated Multi-Color Gradient Bar -->
+        <div class="h-1.5 animated-footer-bar w-full shadow-inner"></div>
+        <div class="bg-slate-900 text-slate-300 py-4 px-4 text-center text-xs md:text-sm font-semibold tracking-wide">
+            <span class="inline-flex items-center gap-1">
+                <i class="fa-regular fa-copyright text-slate-400"></i>
+                <span>جميع الحقوق محفوظة للدكتور مازن بدوي - دكتوراه في مناهج وطرق تدريس اللغة الإنجليزية واختباراتها</span>
+            </span>
+            <div class="text-[10px] text-slate-500 mt-1 tracking-wider uppercase font-bold">
+                All rights are reserved to Dr. Mazen Badawy – Doctor of English Teaching & Testing
+            </div>
+        </div>
+    </footer>
+
+    <!-- SYSTEM JAVASCRIPT CONTROLLERS -->
+    <script>
+        // Zoom and full screen controllers
+        let currentZoom = 1.0;
+        function changeZoom(factor) {
+            currentZoom += factor;
+            if (currentZoom < 0.7) currentZoom = 0.7;
+            if (currentZoom > 1.4) currentZoom = 1.4;
+            document.body.style.fontSize = (currentZoom * 16) + 'px';
+            document.getElementById('zoom-label').innerText = Math.round(currentZoom * 100) + '%';
+        }
+        function resetZoom() {
+            currentZoom = 1.0;
+            document.body.style.fontSize = '16px';
+            document.getElementById('zoom-label').innerText = '100%';
+        }
+        function toggleFullScreen() {
+            const doc = window.document;
+            const docEl = doc.documentElement;
+
+            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                requestFullScreen.call(docEl);
+                document.getElementById('fullscreen-icon').className = "fa-solid fa-compress";
+            } else {
+                cancelFullScreen.call(doc);
+                document.getElementById('fullscreen-icon').className = "fa-solid fa-expand";
+            }
+        }
+
+        // Toast System
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded-xl shadow-xl border text-sm font-bold transition-all duration-300 transform translate-y-4 opacity-0 flex items-center gap-2 pointer-events-auto bg-white`;
+            
+            if (type === 'success') {
+                toast.classList.add('border-emerald-200', 'text-emerald-800');
+                toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i> <span>${message}</span>`;
+            } else if (type === 'warning') {
+                toast.classList.add('border-amber-200', 'text-amber-800');
+                toast.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500 text-lg"></i> <span>${message}</span>`;
+            } else {
+                toast.classList.add('border-rose-200', 'text-rose-800');
+                toast.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-500 text-lg"></i> <span>${message}</span>`;
+            }
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-4', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Global State Variables
+        let datasets = {
+            1: [], // Faculty Members
+            2: [], // Supporting Staff
+            3: []  // Administrative Staff
+        };
+
+        let currentCategory = null; // 1, 2, or 3
+        let currentAnalysisType = 'group'; // 'group' or 'individual'
+        let currentChart = null; // To hold ChartJS instance
+        let currentChartType = 'bar'; // 'bar' or 'line'
+        let currentSelectedGroup = ''; // Department/Administration
+        let currentSelectedIndividual = ''; // Member Name
+        let isMembersCollapsed = false;
+
+        // Custom Safe CSV Parser supporting quoted fields with commas
+        function parseCSV(text) {
+            let lines = [];
+            let row = [""];
+            let inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                let c = text[i];
+                let next = text[i+1];
+                if (c === '"') {
+                    if (inQuotes && next === '"') {
+                        row[row.length - 1] += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (c === ',' && !inQuotes) {
+                    row.push('');
+                } else if ((c === '\r' || c === '\n') && !inQuotes) {
+                    if (c === '\r' && next === '\n') { i++; }
+                    lines.push(row);
+                    row = [''];
+                } else {
+                    row[row.length - 1] += c;
+                }
+            }
+            if (row.length > 1 || row[0] !== '') {
+                lines.push(row);
+            }
+            return lines;
+        }
+
+        // Deep Clean Course names
+        function cleanCourseName(course) {
+            if (!course) return '';
+            let cleaned = course.trim();
+            // Remove redundant quotes or leading brackets if broken
+            cleaned = cleaned.replace(/^"|"$/g, '').trim();
+            cleaned = cleaned.replace(/^\(|\)$/g, '').trim();
+            return cleaned;
+        }
+
+        // Map Rows to structured JSON Objects
+        function mapCsvData(lines) {
+            if (lines.length < 2) return [];
+            const header = lines[0].map(h => h.trim());
+            
+            // Find critical indices
+            const nameIdx = header.findIndex(h => h.includes('الاسم') || h.includes('الاسم رباعي'));
+            const deptIdx = header.findIndex(h => h.includes('القسم') || h.includes('الادارة') || h.includes('الإدارة'));
+            
+            // Ensure courseIdx matches column D and not column E ("المقترحة")
+            const courseIdx = header.findIndex(h => h.includes('اختر الدورات') || (h.includes('الدورات') && !h.includes('المقترحة')));
+            const proposedIdx = header.findIndex(h => h.includes('المقترحة'));
+            const timestampIdx = header.findIndex(h => h.includes('Timestamp') || h.includes('الطابع الزمني'));
+
+            let dataObjects = [];
+            for (let i = 1; i < lines.length; i++) {
+                let row = lines[i];
+                if (row.length <= 1 || !row[nameIdx]) continue; // Skip empty rows
+
+                // Extract and clean courses (separated by commas)
+                let rawCourses = row[courseIdx] || '';
+                let coursesArray = rawCourses.split(',').map(cleanCourseName).filter(c => c.length > 0);
+
+                // Extract custom proposed courses (Column E)
+                let proposedCoursesString = proposedIdx !== -1 ? row[proposedIdx]?.trim() || '' : '';
+                proposedCoursesString = proposedCoursesString.replace(/^"|"$/g, '').trim();
+
+                dataObjects.push({
+                    timestamp: row[timestampIdx] || '',
+                    name: row[nameIdx]?.trim() || '',
+                    department: row[deptIdx]?.trim() || 'عام',
+                    courses: coursesArray,
+                    originalCoursesString: rawCourses,
+                    proposedCourses: proposedCoursesString
+                });
+            }
+            return dataObjects;
+        }
+
+        // Loading overlay display control
+        function showLoading(show, title = "", desc = "") {
+            const overlay = document.getElementById('loading-overlay');
+            if (show) {
+                if (title) document.getElementById('loading-title').innerText = title;
+                if (desc) document.getElementById('loading-desc').innerText = desc;
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+            } else {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }
+        }
+
+        // On-the-fly fetch from live Google Sheet using visualization API (bypass CORS)
+        async function fetchFromGoogleSheets() {
+            showLoading(true, "جاري جلب البيانات من Google Sheets...", "يتم تحميل الأوراق الثلاثة وتحليلها لحظياً...");
+            const spreadsheetId = "10pLfzze0lP39S_tb1s_-KcO0biXDTmFCmZ6DAKYBFP4";
+            
+            const sheetsConfig = [
+                { id: 1, name: "Form Responses 1" },
+                { id: 2, name: "Form Responses 2" },
+                { id: 3, name: "Form Responses 3" }
+            ];
+
+            let successCount = 0;
+
+            for (const sheet of sheetsConfig) {
+                try {
+                    // Google visualization query returns pristine CSV representation directly
+                    const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet.name)}`;
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        const csvText = await response.text();
+                        const parsed = parseCSV(csvText);
+                        const mapped = mapCsvData(parsed);
+                        if (mapped && mapped.length > 0) {
+                            datasets[sheet.id] = mapped;
+                            successCount++;
+                        }
+                    }
+                } catch (err) {
+                    console.error(`خطأ في تحميل الفئة ${sheet.name}:`, err);
+                }
+            }
+
+            showLoading(false);
+
+            if (successCount > 0) {
+                showToast(`تم مزامنة وتحديث البيانات الحية بنجاح (${successCount}/3 ورقات)!`);
+                updateGlobalUIStats();
+                setCategory(currentCategory || 1);
+            } else {
+                showToast("فشلت المزامنة المباشرة. يرجى مراجعة صلاحيات مشاركة الملف.", "error");
+            }
+        }
+
+        // Update overall stat counters at top
+        function updateGlobalUIStats() {
+            document.getElementById('stat-faculty-count').innerText = datasets[1].length;
+            document.getElementById('stat-support-count').innerText = datasets[2].length;
+            document.getElementById('stat-admin-count').innerText = datasets[3].length;
+
+            document.getElementById('cat-count-lbl-1').innerText = `${datasets[1].length} مشارك مسجل`;
+            document.getElementById('cat-count-lbl-2').innerText = `${datasets[2].length} مشارك مسجل`;
+            document.getElementById('cat-count-lbl-3').innerText = `${datasets[3].length} مشارك مسجل`;
+        }
+
+        // Category selection switch
+        function setCategory(catNum) {
+            currentCategory = catNum;
+
+            // Reset active style classes
+            [1, 2, 3].forEach(id => {
+                const btn = document.getElementById(`cat-btn-${id}`);
+                const iconBox = document.getElementById(`cat-icon-${id}`);
+                if (id === catNum) {
+                    btn.className = "flex items-center gap-3 p-3.5 rounded-xl border-2 text-right transition-all font-semibold glass-input border-blue-500 bg-blue-50/50 text-blue-900 shadow-md ring-2 ring-blue-500/20";
+                    iconBox.className = "w-8 h-8 rounded-lg flex items-center justify-center text-sm bg-blue-500 text-white shadow";
+                } else {
+                    btn.className = "flex items-center gap-3 p-3.5 rounded-xl border-2 text-right transition-all font-semibold glass-input border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50";
+                    iconBox.className = "w-8 h-8 rounded-lg flex items-center justify-center text-sm bg-slate-100 text-slate-500";
+                }
+            });
+
+            // Rebuild department & individual options for this chosen category
+            buildSelectors();
+            resetAnalysisDashboard();
+        }
+
+        // Set analysis type (Group vs Individual)
+        function setAnalysisType(type) {
+            currentAnalysisType = type;
+            const groupBtn = document.getElementById('analysis-btn-group');
+            const indBtn = document.getElementById('analysis-btn-individual');
+
+            if (type === 'group') {
+                groupBtn.className = "py-2.5 rounded-lg text-center text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md transform hover:scale-[1.02] transition duration-200";
+                indBtn.className = "py-2.5 rounded-lg text-center text-sm font-bold text-slate-600 hover:bg-white/60 transition duration-200";
+                
+                document.getElementById('selection-group-wrapper').classList.remove('hidden');
+                document.getElementById('selection-individual-wrapper').classList.add('hidden');
+                document.getElementById('dynamic-select-label').innerHTML = `<span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white text-xs">٣</span>اختر القسم أو الإدارة:`;
+            } else {
+                indBtn.className = "py-2.5 rounded-lg text-center text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md transform hover:scale-[1.02] transition duration-200";
+                groupBtn.className = "py-2.5 rounded-lg text-center text-sm font-bold text-slate-600 hover:bg-white/60 transition duration-200";
+                
+                document.getElementById('selection-group-wrapper').classList.add('hidden');
+                document.getElementById('selection-individual-wrapper').classList.remove('hidden');
+                document.getElementById('dynamic-select-label').innerHTML = `<span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white text-xs">٣</span>اختر اسم العضو / المنتسب:`;
+            }
+
+            // Populate / Refresh view
+            buildSelectors();
+            resetAnalysisDashboard();
+        }
+
+        // Construct Selection options based on loaded CSV data
+        function buildSelectors() {
+            const dataList = datasets[currentCategory] || [];
+            
+            if (currentAnalysisType === 'group') {
+                // Collect unique departments
+                let depts = [...new Set(dataList.map(item => item.department))].filter(Boolean);
+                const selectElement = document.getElementById('group-select');
+                selectElement.innerHTML = `<option value="">-- اختر القسم/الإدارة للتصفية مجمعة --</option>`;
+                
+                depts.forEach(dept => {
+                    const count = dataList.filter(item => item.department === dept).length;
+                    selectElement.innerHTML += `<option value="${dept}">${dept} (${count} مستجيبين)</option>`;
+                });
+            } else {
+                // Collect and sort names
+                let names = dataList.map(item => item.name).filter(Boolean);
+                names.sort((a, b) => a.localeCompare(b, 'ar'));
+
+                // Reset searching input
+                document.getElementById('individual-search').value = '';
+                populateIndividualSelect(names);
+            }
+        }
+
+        // Populates individual search selector
+        function populateIndividualSelect(namesList) {
+            const selectElement = document.getElementById('individual-select');
+            selectElement.innerHTML = '';
+            namesList.forEach(name => {
+                selectElement.innerHTML += `<option value="${name}" class="p-2 border-b border-slate-50 cursor-pointer rounded hover:bg-indigo-50/50">${name}</option>`;
+            });
+        }
+
+        // Filters individual name dropdown based on typed keywords
+        function filterNames() {
+            const query = document.getElementById('individual-search').value.toLowerCase().trim();
+            const dataList = datasets[currentCategory] || [];
+            let names = dataList.map(item => item.name).filter(Boolean);
+            names.sort((a, b) => a.localeCompare(b, 'ar'));
+
+            if (query !== '') {
+                names = names.filter(name => name.toLowerCase().includes(query));
+            }
+            populateIndividualSelect(names);
+        }
+
+        // Triggers when Group dropdown changes
+        function onGroupSelectChange() {
+            currentSelectedGroup = document.getElementById('group-select').value;
+            if (currentSelectedGroup) {
+                runAnalysis();
+            } else {
+                resetAnalysisDashboard();
+            }
+        }
+
+        // Triggers when Individual select changes
+        function onIndividualSelectChange() {
+            currentSelectedIndividual = document.getElementById('individual-select').value;
+            if (currentSelectedIndividual) {
+                runAnalysis();
+            } else {
+                resetAnalysisDashboard();
+            }
+        }
+
+        // Reset display to empty state when selections are empty
+        function resetAnalysisDashboard() {
+            document.getElementById('empty-state').classList.remove('hidden');
+            document.getElementById('active-analysis-board').classList.add('hidden');
+        }
+
+        // Calculate and Draw active analysis dashboard (The brain of the system)
+        function runAnalysis() {
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('active-analysis-board').classList.remove('hidden');
+
+            const fullData = datasets[currentCategory] || [];
+            
+            if (currentAnalysisType === 'group') {
+                // 1. COLLECTIVE GROUP ANALYSIS FLOW
+                document.getElementById('nested-members-panel').classList.remove('hidden');
+                document.getElementById('chart-controls-box').classList.remove('hidden');
+                
+                // Filter records belong to chosen department
+                const subset = fullData.filter(item => item.department === currentSelectedGroup);
+
+                // Stats Computation
+                const totalParticipants = subset.length;
+                let courseCounts = {};
+                subset.forEach(item => {
+                    item.courses.forEach(c => {
+                        courseCounts[c] = (courseCounts[c] || 0) + 1;
+                    });
+                });
+
+                // Convert to key-value pairs sorted descending
+                let sortedCourses = Object.entries(courseCounts).sort((a, b) => b[1] - a[1]);
+                const totalRequests = sortedCourses.reduce((sum, item) => sum + item[1], 0);
+                const topCourse = sortedCourses[0] ? sortedCourses[0][0] : 'لا يوجد';
+                const topCourseCount = sortedCourses[0] ? sortedCourses[0][1] : 0;
+
+                // Update UI KPI widgets
+                document.getElementById('summary-stat-1-title').innerText = "مستجيبي القسم";
+                document.getElementById('summary-stat-1-val').className = "text-4xl font-black mt-2 block text-white";
+                document.getElementById('summary-stat-1-val').innerText = totalParticipants;
+                document.getElementById('summary-stat-1-desc').innerText = `إجمالي منتسبي قسم: ${currentSelectedGroup}`;
+
+                document.getElementById('summary-stat-2-title').innerText = "إجمالي طلبات التطوير";
+                document.getElementById('summary-stat-2-val').innerText = totalRequests;
+                document.getElementById('summary-stat-2-desc').innerText = "رغبة تدريبية تم تسجيلها";
+
+                document.getElementById('summary-stat-3-title').innerText = "الدورة الأكثر إلحاحاً";
+                document.getElementById('summary-stat-3-val').className = "text-base font-bold mt-2 truncate max-w-full block";
+                document.getElementById('summary-stat-3-val').innerText = topCourse;
+                document.getElementById('summary-stat-3-desc').innerText = `طلبها ${topCourseCount} من أصل ${totalParticipants} مستجيبين`;
+
+                // Set Section Titles
+                document.getElementById('chart-section-title').innerText = `مستويات طلب الدورات بقسم: ${currentSelectedGroup}`;
+                document.getElementById('table-section-title').innerText = `جدول تفصيلي بترتيب احتياج الدورات التدريبية لـ ${currentSelectedGroup}`;
+
+                // Populate Table
+                let tableHTML = `
+                    <table class="w-full text-right text-sm">
+                        <thead class="bg-slate-50 text-slate-600 border-b border-slate-100 font-bold">
+                            <tr>
+                                <th class="p-3">#</th>
+                                <th class="p-3">عنوان الدورة التدريبية المقترحة</th>
+                                <th class="p-3 text-center">التكرار (الطلب)</th>
+                                <th class="p-3 text-center">النسبة المئوية للاحتياج</th>
+                                <th class="p-3 text-center">مستوى الأولوية</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                `;
+
+                if (sortedCourses.length === 0) {
+                    tableHTML += `<tr><td colspan="5" class="p-4 text-center text-slate-400">لا توجد احتياجات مسجلة لهذا القسم حالياً.</td></tr>`;
+                } else {
+                    sortedCourses.forEach(([course, count], idx) => {
+                        const pct = ((count / totalParticipants) * 100).toFixed(1);
+                        let priorityBadge = "";
+                        
+                        if (pct >= 60) {
+                            priorityBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 border border-rose-100">أولوية عاجلة جداً</span>`;
+                        } else if (pct >= 35) {
+                            priorityBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-600 border border-amber-100">أولوية متوسطة</span>`;
+                        } else {
+                            priorityBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100">أولوية منخفضة</span>`;
+                        }
+
+                        tableHTML += `
+                            <tr class="hover:bg-slate-50/50 transition duration-150">
+                                <td class="p-3 font-bold text-slate-400">${idx + 1}</td>
+                                <td class="p-3 font-bold text-slate-800">${course}</td>
+                                <td class="p-3 text-center font-extrabold text-blue-600 text-base">${count}</td>
+                                <td class="p-3 text-center">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <div class="w-20 bg-slate-100 rounded-full h-2 overflow-hidden hidden sm:block">
+                                            <div class="bg-indigo-500 h-full" style="width: ${pct}%"></div>
+                                        </div>
+                                        <span class="font-bold text-slate-700">${pct}%</span>
+                                    </div>
+                                </td>
+                                <td class="p-3 text-center">${priorityBadge}</td>
+                            </tr>
+                        `;
+                    });
+                }
+                tableHTML += `</tbody></table>`;
+                document.getElementById('data-table-container').innerHTML = tableHTML;
+
+                // Render Beautiful Interactive Chart
+                renderChart(sortedCourses.map(x => x[0]), sortedCourses.map(x => x[1]), `طلبات القسم (${currentSelectedGroup})`);
+
+                // Populate Sub-members Panel
+                populateNestedMembers(subset);
+
+            } else {
+                // 2. INDIVIDUAL PERSONAL ANALYSIS FLOW
+                document.getElementById('nested-members-panel').classList.add('hidden');
+                document.getElementById('chart-controls-box').classList.add('hidden');
+
+                // Find specific staff member record
+                const person = fullData.find(item => item.name === currentSelectedIndividual);
+
+                if (person) {
+                    const totalSelected = person.courses.length;
+                    
+                    // Update KPI Widgets for Individual representation
+                    document.getElementById('summary-stat-1-title').innerText = "اسم المنتسب";
+                    document.getElementById('summary-stat-1-val').className = "text-xl font-bold mt-2 truncate block text-white";
+                    document.getElementById('summary-stat-1-val').innerText = person.name;
+                    document.getElementById('summary-stat-1-desc').innerText = `تاريخ التسجيل: ${person.timestamp}`;
+
+                    document.getElementById('summary-stat-2-title').innerText = "القسم / الإدارة التابع لها";
+                    document.getElementById('summary-stat-2-val').className = "text-lg font-bold mt-2 truncate block text-white";
+                    document.getElementById('summary-stat-2-val').innerText = person.department;
+                    document.getElementById('summary-stat-2-desc').innerText = "تمت المطابقة الذكية للقسم";
+
+                    document.getElementById('summary-stat-3-title').innerText = "إجمالي الدورات المطلوبة";
+                    document.getElementById('summary-stat-3-val').className = "text-4xl font-black mt-2 block";
+                    document.getElementById('summary-stat-3-val').innerText = totalSelected;
+                    document.getElementById('summary-stat-3-desc').innerText = "مهارة للتطوير الفردي";
+
+                    // Set Section titles
+                    document.getElementById('chart-section-title').innerText = `مستوى تكرار الاحتياجات الإجمالية لقسم: ${person.department} (للمقارنة)`;
+                    document.getElementById('table-section-title').innerText = `الدورات والمهارات التي طلبها العضو: ${person.name}`;
+
+                    // Render Individual Table of requests
+                    let tableHTML = `
+                        <table class="w-full text-right text-sm">
+                            <thead class="bg-slate-50 text-slate-600 border-b border-slate-100 font-bold">
+                                <tr>
+                                    <th class="p-3 w-16">#</th>
+                                    <th class="p-3">الدورة التدريبية المطلوبة من القائمة المغلقة</th>
+                                    <th class="p-3 text-center">حالة الطلب</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                    `;
+
+                    if (person.courses.length === 0) {
+                        tableHTML += `<tr><td colspan="3" class="p-4 text-center text-slate-400">لم يقم باختيار أي دورات من القائمة المغلقة.</td></tr>`;
+                    } else {
+                        person.courses.forEach((course, idx) => {
+                            tableHTML += `
+                                <tr class="hover:bg-slate-50/50 transition">
+                                    <td class="p-3 font-bold text-slate-400">${idx + 1}</td>
+                                    <td class="p-3 font-extrabold text-slate-800 flex items-center gap-2">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                                        ${course}
+                                    </td>
+                                    <td class="p-3 text-center">
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100"><i class="fa-solid fa-check ml-1"></i>رغبة مسجلة</span>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    tableHTML += `</tbody></table>`;
+
+                    // Generate Elegant Box for Self-Proposed courses (Column E)
+                    let proposedBlockHTML = '';
+                    const cleanProposed = person.proposedCourses ? person.proposedCourses.trim() : '';
+                    
+                    if (cleanProposed && cleanProposed !== 'No' && cleanProposed !== 'لا' && cleanProposed !== 'لا يوجد' && cleanProposed !== '-') {
+                        proposedBlockHTML = `
+                            <div class="mt-5 p-5 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 rounded-2xl border border-emerald-200 shadow-sm flex items-start gap-4">
+                                <div class="w-11 h-11 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                                    <i class="fa-solid fa-lightbulb text-xl animate-pulse"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider block">مقترحات تدريبية إضافية مخصصة (العمود E):</span>
+                                    <p class="text-sm text-slate-700 font-black mt-2 leading-relaxed bg-white/75 p-3 rounded-xl border border-emerald-100/60">${cleanProposed}</p>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        proposedBlockHTML = `
+                            <div class="mt-5 p-4 bg-slate-50 rounded-2xl border border-slate-200/50 flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center shrink-0">
+                                    <i class="fa-regular fa-lightbulb text-lg"></i>
+                                </div>
+                                <div>
+                                    <span class="text-xs font-bold text-slate-500 block">مقترحات تدريبية إضافية مخصصة (العمود E):</span>
+                                    <p class="text-xs text-slate-400 font-semibold mt-1">لم يقم العضو بتسجيل مقترحات أو دورات إضافية يدوية في هذا الاستبيان.</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // Render both standard table and proposed box
+                    document.getElementById('data-table-container').innerHTML = tableHTML + proposedBlockHTML;
+
+                    // Show comparison graph: highlight personal courses vs other department requests
+                    const deptSubset = fullData.filter(item => item.department === person.department);
+                    let deptCourseCounts = {};
+                    deptSubset.forEach(m => {
+                        m.courses.forEach(c => {
+                            deptCourseCounts[c] = (deptCourseCounts[c] || 0) + 1;
+                        });
+                    });
+                    let sortedDeptCourses = Object.entries(deptCourseCounts).sort((a, b) => b[1] - a[1]);
+
+                    // Generate comparison chart datasets
+                    const labels = sortedDeptCourses.map(x => x[0]);
+                    const counts = sortedDeptCourses.map(x => x[1]);
+                    // Coloring: Highlight courses chosen by the selected individual
+                    const colors = labels.map(label => {
+                        return person.courses.includes(label) ? 'rgba(16, 185, 129, 0.85)' : 'rgba(59, 130, 246, 0.45)';
+                    });
+
+                    renderIndividualChart(labels, counts, colors, `مقارنة احتياجات (${person.name}) مقابل زملائه بقسم (${person.department})`);
+                }
+            }
+        }
+
+        // Populates Collapsible Sub-members list underneath
+        function populateNestedMembers(subset) {
+            const listDiv = document.getElementById('members-list-content');
+            listDiv.innerHTML = '';
+
+            subset.forEach(member => {
+                let badgeHTML = '';
+                member.courses.forEach(c => {
+                    badgeHTML += `<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-100/40">${c}</span>`;
+                });
+
+                listDiv.innerHTML += `
+                    <div class="p-3 rounded-xl bg-white/60 border border-slate-100 hover:border-blue-200 transition duration-150 flex flex-col gap-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-slate-800 text-xs">${member.name}</span>
+                            <span class="text-[10px] text-slate-400 font-medium">${member.timestamp.split(' ')[0]}</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1">
+                            ${badgeHTML || '<span class="text-xs text-slate-400">لا يوجد دورات</span>'}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleMembersCollapse() {
+            isMembersCollapsed = !isMembersCollapsed;
+            const content = document.getElementById('members-list-content');
+            const btn = document.getElementById('members-collapse-btn');
+
+            if (isMembersCollapsed) {
+                content.classList.add('hidden');
+                btn.innerHTML = `<i class="fa-solid fa-chevron-down text-sm"></i>`;
+            } else {
+                content.classList.remove('hidden');
+                btn.innerHTML = `<i class="fa-solid fa-chevron-up text-sm"></i>`;
+            }
+        }
+
+        // Render standard aggregated charts
+        function renderChart(labels, data, title) {
+            if (currentChart) currentChart.destroy();
+
+            const ctx = document.getElementById('analytics-canvas-chart').getContext('2d');
+            
+            // Switch orientation style classes
+            const barBtn = document.getElementById('chart-type-bar');
+            const lineBtn = document.getElementById('chart-type-line');
+            
+            if (currentChartType === 'bar') {
+                barBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow";
+                lineBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-100";
+            } else {
+                lineBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow";
+                barBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-100";
+            }
+
+            // Create gradients
+            let chartBg = 'rgba(59, 130, 246, 0.8)';
+            if (currentChartType === 'bar') {
+                const grad = ctx.createLinearGradient(0, 0, 400, 0);
+                grad.addColorStop(0, 'rgba(59, 130, 246, 0.85)');
+                grad.addColorStop(1, 'rgba(99, 102, 241, 0.85)');
+                chartBg = grad;
+            }
+
+            currentChart = new Chart(ctx, {
+                type: currentChartType === 'bar' ? 'bar' : 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: title,
+                        data: data,
+                        backgroundColor: chartBg,
+                        borderColor: '#3b82f6',
+                        borderWidth: currentChartType === 'line' ? 3 : 0,
+                        fill: currentChartType === 'line',
+                        tension: 0.3,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: currentChartType === 'bar' ? 'y' : 'x',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            rtl: true,
+                            bodyFont: { family: 'Cairo' },
+                            titleFont: { family: 'Cairo' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { font: { family: 'Cairo', size: 10 }, color: '#64748b' },
+                            grid: { color: 'rgba(241, 245, 249, 1)' }
+                        },
+                        y: {
+                            ticks: { font: { family: 'Cairo', size: 10 }, color: '#64748b' },
+                            grid: { color: 'rgba(241, 245, 249, 1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render customized individual comparison charts
+        function renderIndividualChart(labels, data, colors, title) {
+            if (currentChart) currentChart.destroy();
+
+            const ctx = document.getElementById('analytics-canvas-chart').getContext('2d');
+            currentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'عدد مرات تكرار الطلب بقسمه',
+                        data: data,
+                        backgroundColor: colors,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            rtl: true,
+                            bodyFont: { family: 'Cairo' },
+                            titleFont: { family: 'Cairo' },
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const rawBg = context.dataset.backgroundColor[context.dataIndex];
+                                    if (rawBg.includes('16, 185, 129')) {
+                                        return " (من الدورات التي قام العضو باختيارها بنجاح) ";
+                                    }
+                                    return " (لم يطلبها هذا العضو) ";
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { font: { family: 'Cairo', size: 10 } }, grid: { display: false } },
+                        y: { ticks: { font: { family: 'Cairo', size: 10 } }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // Dynamic change of graph layout structure
+        function changeChartType(type) {
+            currentChartType = type;
+            if (currentSelectedGroup || currentSelectedIndividual) {
+                runAnalysis();
+            }
+        }
+
+        // --- EXPORT FUNCTION TO EXCEL (CSV) ---
+        function exportToCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // Include BOM for Arabic encoding
+            const fullData = datasets[currentCategory] || [];
+
+            if (currentAnalysisType === 'group') {
+                const subset = fullData.filter(item => item.department === currentSelectedGroup);
+                let courseCounts = {};
+                subset.forEach(item => {
+                    item.courses.forEach(c => {
+                        courseCounts[c] = (courseCounts[c] || 0) + 1;
+                    });
+                });
+                let sortedCourses = Object.entries(courseCounts).sort((a, b) => b[1] - a[1]);
+
+                csvContent += "م,الدورة التدريبية المقترحة,تكرار الطلب بقسم (" + currentSelectedGroup + "),النسبة المئوية للاحتياج\n";
+                sortedCourses.forEach(([course, count], idx) => {
+                    const pct = ((count / subset.length) * 100).toFixed(1);
+                    csvContent += `${idx + 1},"${course.replace(/"/g, '""')}",${count},${pct}%\n`;
+                });
+            } else {
+                const person = fullData.find(item => item.name === currentSelectedIndividual);
+                if (!person) return;
+                csvContent += "م,الاسم,القسم,الدورة المطلوبة,الدورات المقترحة ذاتياً\n";
+                person.courses.forEach((course, idx) => {
+                    csvContent += `${idx + 1},"${person.name}","${person.department}","${course.replace(/"/g, '""')}","${(idx === 0 ? person.proposedCourses : '').replace(/"/g, '""')}"\n`;
+                });
+            }
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            const fileName = currentAnalysisType === 'group' ? `تحليل_احتياجات_${currentSelectedGroup}.csv` : `دورات_العضو_${currentSelectedIndividual}.csv`;
+            link.setAttribute("download", fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Page load triggers
+        window.onload = function () {
+            // Fetch live sheet data directly on startup
+            fetchFromGoogleSheets();
+        }
+    </script>
+</body>
+</html>
