@@ -55,6 +55,7 @@
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.5);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+            transition: all 0.3s ease;
         }
 
         .glass-input {
@@ -77,7 +78,7 @@
         .animated-footer-bar {
             background: linear-gradient(270deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #3b82f6);
             background-size: 1200% 1200%;
-            animation: gradient-scroll 20s ease infinite;
+            animation: gradient-scroll 15s ease infinite;
         }
 
         /* Card Scale Transitions */
@@ -87,6 +88,63 @@
         .interactive-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 12px 24px -10px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Print Optimization Styling */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                font-size: 11pt !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            /* Hide non-printable screen components */
+            header,
+            #controls-sidebar,
+            .fixed, /* Zoom, fullscreen and layout toggle buttons */
+            #toast-container,
+            #empty-state,
+            button,
+            a,
+            footer,
+            #chart-controls-box,
+            .print-hide {
+                display: none !important;
+            }
+            /* Show beautiful print header */
+            #print-header-layout {
+                display: flex !important;
+            }
+            /* Reset layouts for formal full-width print */
+            main {
+                display: block !important;
+            }
+            #dashboard-results {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+            }
+            .glass-panel {
+                background: transparent !important;
+                backdrop-filter: none !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin-bottom: 1.5rem !important;
+                page-break-inside: avoid;
+            }
+            /* Prevent charts from breaking in half */
+            canvas {
+                max-width: 100% !important;
+                height: 280px !important;
+            }
+            /* Avoid row cutoffs */
+            tr {
+                page-break-inside: avoid !important;
+            }
         }
     </style>
 </head>
@@ -105,7 +163,7 @@
     <div id="toast-container" class="fixed bottom-20 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- TOP SYSTEM CONTROLS (Floating Zoom & Fullscreen) -->
-    <div class="fixed top-4 left-4 z-40 flex items-center gap-2 bg-white/90 p-2 rounded-full shadow-lg border border-slate-200">
+    <div class="fixed top-4 left-4 z-40 flex items-center gap-2 bg-white/90 p-2 rounded-full shadow-lg border border-slate-200 print-hide">
         <button onclick="changeZoom(-0.05)" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition text-slate-700" title="تصغير الخط">
             <i class="fa-solid fa-minus text-sm"></i>
         </button>
@@ -119,48 +177,72 @@
         </button>
     </div>
 
+    <!-- LAYOUT FULLSCREEN TOGGLER (Circular Floating Toggle Button - Dr. Mazen Requirement) -->
+    <button onclick="toggleSidebarAndHeader()" class="fixed bottom-6 left-6 z-40 w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 print-hide" title="عرض كامل الشاشة / لوحة التحكم الموسعة">
+        <i class="fa-solid fa-arrows-alt-h text-lg" id="layout-toggle-icon"></i>
+    </button>
+
+    <!-- DYNAMIC OFFICIAL PRINT-ONLY HEADER -->
+    <div id="print-header-layout" class="hidden flex-row items-center justify-between border-b-4 border-slate-800 pb-4 mb-6 w-full text-slate-900">
+        <!-- Logo Right -->
+        <img src="00.png" alt="شعار المعهد" class="h-20 w-auto object-contain" onerror="this.src='https://placehold.co/120x120/3b82f6/ffffff?text=00.png'">
+        <!-- Center Header Text -->
+        <div class="text-center flex-grow px-4">
+            <h1 class="text-xl font-extrabold tracking-tight">المعهد العالي للهندسة والتكنولوجيا بكفر الشيخ</h1>
+            <h2 id="print-report-main-title" class="text-base font-bold mt-1 text-slate-700">تقرير إحصائي للاحتياجات التدريبية</h2>
+            <p id="print-report-meta-subtitle" class="text-xs text-slate-500 mt-1"></p>
+        </div>
+        <!-- Logo Left -->
+        <img src="02.png" alt="شعار الجودة" class="h-20 w-auto object-contain" onerror="this.src='https://placehold.co/120x120/10b981/ffffff?text=02.png'">
+    </div>
+
     <!-- MAIN APP WRAPPER -->
-    <div class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 md:px-8 flex flex-col gap-6">
+    <div class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 md:px-8 flex flex-col gap-6" id="app-content-wrapper">
         
         <!-- HEADER SECTION -->
-        <header class="glass-panel rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border-b-4 border-blue-500 relative overflow-hidden">
+        <header id="main-app-header" class="glass-panel rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border-b-4 border-blue-500 relative overflow-hidden">
             <!-- Decorative Light-beams -->
             <div class="absolute -right-20 -top-20 w-60 h-60 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
             <div class="absolute -left-20 -bottom-20 w-60 h-60 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
 
-            <div class="flex items-center gap-5">
-                <div class="w-16 h-16 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl shadow-md">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-900">
+            <div class="flex flex-col sm:flex-row items-center gap-5 w-full md:w-auto">
+                <!-- Logo Right (00.png) -->
+                <img src="00.png" alt="شعار المعهد" class="w-20 h-20 object-contain shadow-sm rounded-lg" onerror="this.onerror=null; this.src='https://placehold.co/120x120/3b82f6/ffffff?text=00.png'">
+                
+                <div class="text-center sm:text-right">
+                    <h1 class="text-xl md:text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-900 font-sans">
                         المعهد العالي للهندسة والتكنولوجيا بكفر الشيخ
                     </h1>
-                    <div class="flex flex-wrap items-center gap-2 mt-1">
-                        <p class="text-sm md:text-base font-semibold text-emerald-600 flex items-center gap-1">
+                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-1">
+                        <p class="text-xs md:text-sm font-semibold text-emerald-600 flex items-center gap-1">
                             <i class="fa-solid fa-chart-line"></i>
                             منظومة تحليل وفلترة الاحتياجات التدريبية الذكية (خطة 2026-2029)
                         </p>
-                        <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">متصل مباشر بـ Google Sheets</span>
+                        <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">متصل مباشر بـ Google Sheets</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Fast Stats / Sync Button -->
-            <div class="flex flex-wrap items-center gap-3">
-                <button onclick="fetchFromGoogleSheets()" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold rounded-xl shadow-md hover:scale-105 transition duration-200 flex items-center gap-2 text-sm">
-                    <i class="fa-solid fa-arrows-rotate"></i>
-                    <span>تحديث البيانات المباشرة</span>
-                </button>
-                <a href="https://docs.google.com/spreadsheets/d/10pLfzze0lP39S_tb1s_-KcO0biXDTmFCmZ6DAKYBFP4/edit?usp=sharing" target="_blank" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition flex items-center gap-1.5" title="رابط شيت البيانات">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                    <span>فتح الشيت الأصلي</span>
-                </a>
+            <!-- Left Side Logo (02.png) & Fast Actions -->
+            <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto justify-end">
+                <!-- Logo Left (02.png) -->
+                <img src="02.png" alt="شعار الجودة" class="w-16 h-16 object-contain hidden md:block" onerror="this.onerror=null; this.src='https://placehold.co/120x120/10b981/ffffff?text=02.png'">
+                
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="fetchFromGoogleSheets()" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold rounded-xl shadow-md hover:scale-105 transition duration-200 flex items-center gap-2 text-xs">
+                        <i class="fa-solid fa-arrows-rotate" id="sync-icon"></i>
+                        <span>تحديث البيانات المباشرة</span>
+                    </button>
+                    <a href="https://docs.google.com/spreadsheets/d/10pLfzze0lP39S_tb1s_-KcO0biXDTmFCmZ6DAKYBFP4/edit?usp=sharing" target="_blank" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-[11px] transition flex items-center gap-1" title="رابط شيت البيانات">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>فتح الشيت الأصلي</span>
+                    </a>
+                </div>
             </div>
         </header>
 
         <!-- GLOBAL STATS OVERVIEW -->
-        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="global-stats-grid">
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fade-in" id="global-stats-grid">
             <!-- Faculty Stat Card -->
             <div class="glass-panel rounded-2xl p-4 flex items-center justify-between border-r-4 border-blue-500 interactive-card">
                 <div>
@@ -203,7 +285,7 @@
             
             <!-- SELECTORS SIDEBAR (Controls & Filtering) -->
             <section class="lg:col-span-4 flex flex-col gap-6" id="controls-sidebar">
-                <div class="glass-panel rounded-3xl p-6 flex flex-col gap-5 border border-white/60">
+                <div class="glass-panel rounded-3xl p-6 flex flex-col gap-5 border border-white/60 shadow-lg">
                     <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
                         <i class="fa-solid fa-sliders text-blue-600 text-lg"></i>
                         <h2 class="text-lg font-bold text-slate-800">تصفية واختيار البيانات</h2>
@@ -222,7 +304,7 @@
                                     <i class="fa-solid fa-chalkboard-teacher"></i>
                                 </div>
                                 <div class="flex-grow">
-                                    <div class="text-sm font-bold">أعضاء هيئة التدريس</div>
+                                    <div class="text-sm font-bold font-sans">أعضاء هيئة التدريس</div>
                                     <div class="text-xs font-medium text-slate-400" id="cat-count-lbl-1">تحميل...</div>
                                 </div>
                             </button>
@@ -232,7 +314,7 @@
                                     <i class="fa-solid fa-user-graduate"></i>
                                 </div>
                                 <div class="flex-grow">
-                                    <div class="text-sm font-bold">الهيئة المعاونة</div>
+                                    <div class="text-sm font-bold font-sans">الهيئة المعاونة</div>
                                     <div class="text-xs font-medium text-slate-400" id="cat-count-lbl-2">تحميل...</div>
                                 </div>
                             </button>
@@ -242,7 +324,7 @@
                                     <i class="fa-solid fa-user-tie"></i>
                                 </div>
                                 <div class="flex-grow">
-                                    <div class="text-sm font-bold">الجهاز الإداري والمكتبي</div>
+                                    <div class="text-sm font-bold font-sans">الجهاز الإداري والمكتبى</div>
                                     <div class="text-xs font-medium text-slate-400" id="cat-count-lbl-3">تحميل...</div>
                                 </div>
                             </button>
@@ -276,7 +358,7 @@
                         
                         <!-- Collective Selection Input -->
                         <div id="selection-group-wrapper" class="relative mt-1">
-                            <select id="group-select" onchange="onGroupSelectChange()" class="w-full p-3.5 glass-input rounded-xl text-sm font-bold text-slate-700 appearance-none">
+                            <select id="group-select" onchange="onGroupSelectChange()" class="w-full p-3.5 glass-input rounded-xl text-sm font-bold text-slate-700 appearance-none cursor-pointer">
                                 <!-- Dynamically populated -->
                             </select>
                             <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
@@ -292,7 +374,7 @@
                                     <i class="fa-solid fa-magnifying-glass"></i>
                                 </div>
                             </div>
-                            <select id="individual-select" onchange="onIndividualSelectChange()" size="5" class="w-full p-2 glass-input rounded-xl text-sm font-semibold text-slate-700 max-h-40 overflow-y-auto">
+                            <select id="individual-select" onchange="onIndividualSelectChange()" size="5" class="w-full p-2 glass-input rounded-xl text-sm font-semibold text-slate-700 max-h-40 overflow-y-auto cursor-pointer">
                                 <!-- Dynamically populated list of names -->
                             </select>
                         </div>
@@ -300,13 +382,13 @@
                 </div>
 
                 <!-- Info Help Card -->
-                <div class="glass-panel rounded-3xl p-5 border border-emerald-200/50 bg-gradient-to-br from-emerald-50/40 to-sky-50/40">
+                <div class="glass-panel rounded-3xl p-5 border border-emerald-200/50 bg-gradient-to-br from-emerald-50/40 to-sky-50/40 shadow-sm">
                     <h3 class="font-bold text-emerald-800 flex items-center gap-2 text-sm">
                         <i class="fa-solid fa-circle-info text-base"></i>
                         كيف يعمل النظام؟
                     </h3>
                     <p class="text-xs text-slate-600 mt-2 leading-relaxed">
-                        يقوم التطبيق بجلب البيانات المحدثة مباشرة من شيت جوجل، ثم يقوم بفصل البيانات تلقائياً وفهرستها. عند اختيار <strong class="text-slate-800">"التحليل الجماعي"</strong>، يقوم النظام بحساب التكرارات والنسب المئوية لكل دورة تدريبية داخل القسم لتقدير الأكثر احتياجاً. عند اختيار <strong class="text-slate-800">"التحليل الفردي"</strong>، يتم استعراض بطاقة تدريبية كاملة للموظف مع الدورات والمهارات التي اقترحها يدوياً من العمود E.
+                        يقوم التطبيق بجلب البيانات المحدثة مباشرة من شيت جوجل، ثم يقوم بفصل البيانات وتفسيرها تلقائياً. عند اختيار <strong class="text-slate-800">"التحليل الجماعي"</strong>، يحسب النظام التكرارات والنسب المئوية لكل دورة تدريبية داخل القسم. وعند اختيار <strong class="text-slate-800">"التحليل الفردي"</strong>، يتم استعراض بطاقة تدريبية كاملة للموظف مع الدورات والمهارات التي اقترحها يدوياً من العمود E.
                     </p>
                 </div>
             </section>
@@ -314,7 +396,7 @@
             <!-- MAIN RESULTS DASHBOARD AREA -->
             <section class="lg:col-span-8 flex flex-col gap-6" id="dashboard-results">
                 
-                <!-- EMPTY / WELCOME STATE -->
+                <!-- EMPTY / WELCOME STATE / DYNAMIC PERMISSIONS HELP WRAPPER -->
                 <div id="empty-state" class="glass-panel rounded-3xl p-12 text-center flex flex-col items-center justify-center gap-4 border-2 border-dashed border-slate-300">
                     <div class="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-3xl">
                         <i class="fa-solid fa-chart-pie animate-pulse"></i>
@@ -335,7 +417,7 @@
                                 <i class="fa-solid fa-users"></i>
                             </div>
                             <span class="text-xs font-bold uppercase tracking-wider text-blue-100 block" id="summary-stat-1-title">المشمولين بالتحليل</span>
-                            <span class="text-4xl font-black mt-2" id="summary-stat-1-val">0</span>
+                            <span class="text-2xl font-black mt-2 truncate block" id="summary-stat-1-val">0</span>
                             <span class="text-xs text-indigo-100 block mt-1" id="summary-stat-1-desc">مستجيب في هذا القسم</span>
                         </div>
 
@@ -344,7 +426,7 @@
                                 <i class="fa-solid fa-list-check"></i>
                             </div>
                             <span class="text-xs font-bold uppercase tracking-wider text-emerald-100 block" id="summary-stat-2-title">إجمالي الرغبات المطلوبة</span>
-                            <span class="text-4xl font-black mt-2" id="summary-stat-2-val">0</span>
+                            <span class="text-2xl font-black mt-2 truncate block" id="summary-stat-2-val">0</span>
                             <span class="text-xs text-emerald-100 block mt-1" id="summary-stat-2-desc">طلب تدريبي إجمالي</span>
                         </div>
 
@@ -359,7 +441,7 @@
                     </div>
 
                     <!-- CHART AND GRAPHICAL REPRESENTATION -->
-                    <div class="glass-panel rounded-3xl p-6 flex flex-col gap-4">
+                    <div class="glass-panel rounded-3xl p-6 flex flex-col gap-4 shadow-md">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                             <div class="flex items-center gap-2">
                                 <i class="fa-solid fa-chart-column text-indigo-600 text-lg"></i>
@@ -382,17 +464,23 @@
                     </div>
 
                     <!-- DETAILED LISTS & TABLES -->
-                    <div class="glass-panel rounded-3xl p-6 flex flex-col gap-4">
+                    <div class="glass-panel rounded-3xl p-6 flex flex-col gap-4 shadow-md">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                             <div class="flex items-center gap-2">
                                 <i class="fa-solid fa-table-list text-emerald-600 text-lg"></i>
                                 <h3 class="font-bold text-slate-800 text-base" id="table-section-title">تفاصيل الاحتياجات التدريبية</h3>
                             </div>
-                            <!-- Export Button -->
-                            <button onclick="exportToCSV()" class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-lg text-xs shadow transition duration-200 flex items-center gap-1.5 self-start">
-                                <i class="fa-solid fa-file-excel"></i>
-                                <span>تصدير البيانات التدريبية (CSV)</span>
-                            </button>
+                            <!-- Export & PDF Print Buttons -->
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button onclick="triggerPDFPrint()" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg text-xs shadow transition duration-200 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                    <span>طباعة التقرير (PDF)</span>
+                                </button>
+                                <button onclick="exportToCSV()" class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-lg text-xs shadow transition duration-200 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-file-excel"></i>
+                                    <span>تصدير البيانات (CSV)</span>
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Table Area (Dynamically Rendered based on context) -->
@@ -402,7 +490,7 @@
                     </div>
 
                     <!-- NESTED INDIVIDUAL MEMBERS LIST (GROUP MODE ONLY) -->
-                    <div class="glass-panel rounded-3xl p-6 flex flex-col gap-4" id="nested-members-panel">
+                    <div class="glass-panel rounded-3xl p-6 flex flex-col gap-4 shadow-md" id="nested-members-panel">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3 cursor-pointer" onclick="toggleMembersCollapse()">
                             <div class="flex items-center gap-2">
                                 <i class="fa-solid fa-user-tag text-blue-600 text-lg"></i>
@@ -423,7 +511,7 @@
     </div>
 
     <!-- GLOBAL PREMIUM FOOTER WITH GRADIENT PROGRESS BAR -->
-    <footer class="mt-auto w-full">
+    <footer id="main-app-footer" class="mt-auto w-full print-hide">
         <!-- Thin Animated Multi-Color Gradient Bar -->
         <div class="h-1.5 animated-footer-bar w-full shadow-inner"></div>
         <div class="bg-slate-900 text-slate-300 py-4 px-4 text-center text-xs md:text-sm font-semibold tracking-wide">
@@ -466,6 +554,36 @@
             } else {
                 cancelFullScreen.call(doc);
                 document.getElementById('fullscreen-icon').className = "fa-solid fa-expand";
+            }
+        }
+
+        // Dashboard/Immersive Fullscreen Toggle (Circular Bottom-Right Button)
+        let isInterfaceHidden = false;
+        function toggleSidebarAndHeader() {
+            isInterfaceHidden = !isInterfaceHidden;
+            const header = document.getElementById('main-app-header');
+            const footer = document.getElementById('main-app-footer');
+            const sidebar = document.getElementById('controls-sidebar');
+            const toggleIcon = document.getElementById('layout-toggle-icon');
+            const resultsContainer = document.getElementById('dashboard-results');
+
+            if (isInterfaceHidden) {
+                header.classList.add('hidden');
+                footer.classList.add('hidden');
+                sidebar.classList.add('hidden');
+                resultsContainer.classList.replace('lg:col-span-8', 'lg:col-span-12');
+                toggleIcon.className = "fa-solid fa-window-restore text-lg";
+                showToast("تم إخفاء عناصر التحكم الجانبية لعرض موسع للبيانات.", "warning");
+            } else {
+                header.classList.remove('hidden');
+                footer.classList.remove('hidden');
+                sidebar.classList.remove('hidden');
+                resultsContainer.classList.replace('lg:col-span-12', 'lg:col-span-8');
+                toggleIcon.className = "fa-solid fa-arrows-alt-h text-lg";
+                showToast("تم استعادة تخطيط الواجهة الافتراضي.", "success");
+            }
+            if (currentChart) {
+                setTimeout(() => { currentChart.resize(); }, 150);
             }
         }
 
@@ -547,7 +665,6 @@
         function cleanCourseName(course) {
             if (!course) return '';
             let cleaned = course.trim();
-            // Remove redundant quotes or leading brackets if broken
             cleaned = cleaned.replace(/^"|"$/g, '').trim();
             cleaned = cleaned.replace(/^\(|\)$/g, '').trim();
             return cleaned;
@@ -606,47 +723,130 @@
             }
         }
 
-        // On-the-fly fetch from live Google Sheet using visualization API (bypass CORS)
+        // Robust fetch routine trying both English and Arabic sheet response tab names
+        async function fetchSheetCSV(spreadsheetId, sheetName) {
+            const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error("NetworkError");
+            }
+            const text = await response.text();
+            // Google redirects to login screen (HTML) if file is locked or restricted
+            if (text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html")) {
+                throw new Error("PermissionDeniedOrLoginRequired");
+            }
+            return text;
+        }
+
+        // Main live fetch controller from Google Sheet
         async function fetchFromGoogleSheets() {
+            const syncIcon = document.getElementById('sync-icon');
+            if (syncIcon) syncIcon.classList.add('animate-spin');
+            
             showLoading(true, "جاري جلب البيانات من Google Sheets...", "يتم تحميل الأوراق الثلاثة وتحليلها لحظياً...");
             const spreadsheetId = "10pLfzze0lP39S_tb1s_-KcO0biXDTmFCmZ6DAKYBFP4";
             
+            // Supporting both English sheet response format and default Arabic Form sheet response names
             const sheetsConfig = [
-                { id: 1, name: "Form Responses 1" },
-                { id: 2, name: "Form Responses 2" },
-                { id: 3, name: "Form Responses 3" }
+                { id: 1, names: ["Form Responses 1", "ردود النموذج 1", "هيئة التدريس", "Sheet1"] },
+                { id: 2, names: ["Form Responses 2", "ردود النموذج 2", "الهيئة المعاونة", "Sheet2"] },
+                { id: 3, names: ["Form Responses 3", "ردود النموذج 3", "الجهاز الإداري", "الجهاز الاداري", "Sheet3"] }
             ];
 
             let successCount = 0;
+            let permissionErrorOccurred = false;
 
             for (const sheet of sheetsConfig) {
-                try {
-                    // Google visualization query returns pristine CSV representation directly
-                    const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet.name)}`;
-                    const response = await fetch(url);
-                    if (response.ok) {
-                        const csvText = await response.text();
-                        const parsed = parseCSV(csvText);
-                        const mapped = mapCsvData(parsed);
-                        if (mapped && mapped.length > 0) {
-                            datasets[sheet.id] = mapped;
-                            successCount++;
+                let csvText = "";
+                let loaded = false;
+
+                // Try names sequentially until success
+                for (const potentialName of sheet.names) {
+                    try {
+                        csvText = await fetchSheetCSV(spreadsheetId, potentialName);
+                        loaded = true;
+                        break; // Name works, skip the rest
+                    } catch (err) {
+                        if (err.message === "PermissionDeniedOrLoginRequired") {
+                            permissionErrorOccurred = true;
                         }
                     }
-                } catch (err) {
-                    console.error(`خطأ في تحميل الفئة ${sheet.name}:`, err);
+                }
+
+                if (loaded) {
+                    const parsed = parseCSV(csvText);
+                    const mapped = mapCsvData(parsed);
+                    if (mapped && mapped.length > 0) {
+                        datasets[sheet.id] = mapped;
+                        successCount++;
+                    }
                 }
             }
 
             showLoading(false);
+            if (syncIcon) syncIcon.classList.remove('animate-spin');
 
-            if (successCount > 0) {
-                showToast(`تم مزامنة وتحديث البيانات الحية بنجاح (${successCount}/3 ورقات)!`);
+            if (successCount === 3) {
+                showToast("تم مزامنة وتحديث جميع البيانات الحية بنجاح!", "success");
+                restoreDefaultEmptyState(); // Restore generic screen
+                updateGlobalUIStats();
+                setCategory(currentCategory || 1);
+            } else if (successCount > 0) {
+                showToast(`تم تحميل بعض البيانات بنجاح (${successCount}/3 ورقات)!`, "warning");
                 updateGlobalUIStats();
                 setCategory(currentCategory || 1);
             } else {
                 showToast("فشلت المزامنة المباشرة. يرجى مراجعة صلاحيات مشاركة الملف.", "error");
+                showPermissionInstructions(); // Change workspace screen to present instructions
             }
+        }
+
+        // Present step-by-step graphical instructions if direct connection fails
+        function showPermissionInstructions() {
+            const emptyState = document.getElementById('empty-state');
+            emptyState.innerHTML = `
+                <div class="p-6 bg-rose-50 border-2 border-rose-200 rounded-3xl text-right max-w-xl mx-auto flex flex-col gap-4 animate-fade-in shadow-lg">
+                    <div class="flex items-center gap-3 text-rose-700">
+                        <i class="fa-solid fa-triangle-exclamation text-3xl animate-bounce"></i>
+                        <h3 class="text-lg font-black">تنبيه: فشل جلب البيانات بسبب صلاحيات مشاركة الملف!</h3>
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        لم يتمكن التطبيق من قراءة البيانات من الرابط لأن الملف مغلق حالياً أو خاص بمالكه فقط. لحل هذه المشكلة والحصول على المزامنة الفورية "on-the-fly"، يرجى اتباع الخطوات البسيطة التالية:
+                    </p>
+                    <ol class="list-decimal list-inside text-xs text-slate-700 flex flex-col gap-2 font-semibold">
+                        <li>اضغط على زر <a href="https://docs.google.com/spreadsheets/d/10pLfzze0lP39S_tb1s_-KcO0biXDTmFCmZ6DAKYBFP4/edit?usp=sharing" target="_blank" class="text-blue-600 underline font-bold">فتح الشيت الأصلي</a> لفتح ملف Excel الخاص بك.</li>
+                        <li>من أعلى اليسار، اضغط على زر <strong class="text-slate-900 font-extrabold">"مشاركة" (Share)</strong>.</li>
+                        <li>تحت بند <strong class="text-slate-900 font-extrabold">"الوصول العام" (General Access)</strong>، قم بتغيير الخيار من <span class="bg-slate-200 px-1 py-0.5 rounded text-slate-800">حصري (Restricted)</span> إلى <strong class="text-emerald-700">"أي شخص لديه الرابط" (Anyone with the link)</strong>.</li>
+                        <li>تأكد من اختيار دور <strong class="text-slate-900">"عارض" (Viewer)</strong> أو <strong class="text-slate-900">"محرر" (Editor)</strong> من القائمة المجاورة.</li>
+                        <li>اضغط <strong class="text-slate-900">"تم" (Done)</strong> ثم عد إلى هنا واضغط على زر <strong class="text-blue-600 font-bold">"تحديث البيانات المباشرة"</strong> للتجربة.</li>
+                    </ol>
+                    <div class="mt-2 p-3 bg-white/80 rounded-xl border border-rose-100 flex items-center justify-between">
+                        <span class="text-xs text-slate-500 font-bold">رابط الملف المستخدم حالياً:</span>
+                        <a href="https://docs.google.com/spreadsheets/d/10pLfzze0lP39S_tb1s_-KcO0biXDTmFCmZ6DAKYBFP4/edit?usp=sharing" target="_blank" class="text-xs text-blue-600 font-black flex items-center gap-1">
+                            <i class="fa-solid fa-link"></i> فتح الرابط
+                        </a>
+                    </div>
+                    <button onclick="fetchFromGoogleSheets()" class="mt-2 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                        إعادة محاولة المزامنة الآن
+                    </button>
+                </div>
+            `;
+            resetAnalysisDashboard();
+        }
+
+        // Restore generic screen when connection works successfully
+        function restoreDefaultEmptyState() {
+            const emptyState = document.getElementById('empty-state');
+            emptyState.innerHTML = `
+                <div class="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-3xl">
+                    <i class="fa-solid fa-chart-pie animate-pulse"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-700 font-sans">الاستبيان جاهز للتحليل المباشر!</h3>
+                <p class="text-slate-500 max-w-md text-sm">
+                    الرجاء تحديد الفئة المستهدفة ونوع التحليل المناسب لتتمكن من عرض الرسوم البيانية والجداول الإحصائية للأقسام والأفراد فوراً استناداً لبيانات Google Sheets.
+                </p>
+            `;
         }
 
         // Update overall stat counters at top
@@ -913,7 +1113,7 @@
                     document.getElementById('summary-stat-3-title').innerText = "إجمالي الدورات المطلوبة";
                     document.getElementById('summary-stat-3-val').className = "text-4xl font-black mt-2 block";
                     document.getElementById('summary-stat-3-val').innerText = totalSelected;
-                    document.getElementById('summary-stat-3-desc').innerText = "مهارة للتطوير الفردي";
+                    document.getElementById('summary-stat-3-desc').innerText = "موقع للتطوير الفردي";
 
                     // Set Section titles
                     document.getElementById('chart-section-title').innerText = `مستوى تكرار الاحتياجات الإجمالية لقسم: ${person.department} (للمقارنة)`;
@@ -1205,6 +1405,37 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+
+        // --- NEW DYNAMIC PRINT TO PDF TRIGGER ---
+        function triggerPDFPrint() {
+            const mainTitleElement = document.getElementById('print-report-main-title');
+            const metaSubtitleElement = document.getElementById('print-report-meta-subtitle');
+
+            const dateStr = new Date().toLocaleDateString('ar-EG', {
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric'
+            });
+
+            let categoryLabel = "";
+            if (currentCategory === 1) categoryLabel = "أعضاء هيئة التدريس";
+            else if (currentCategory === 2) categoryLabel = "الهيئة المعاونة";
+            else if (currentCategory === 3) categoryLabel = "الجهاز الإداري والمكتبي";
+
+            if (currentAnalysisType === 'group') {
+                mainTitleElement.innerText = `تقرير الاحتياجات التدريبية المجمع (الفئة: ${categoryLabel})`;
+                metaSubtitleElement.innerText = `القسم / الإدارة: ${currentSelectedGroup} | تاريخ استخراج التقرير: ${dateStr}`;
+                document.title = `تقرير_الاحتياجات_المجمع_${currentSelectedGroup}`;
+            } else {
+                mainTitleElement.innerText = `تقرير الاحتياجات التدريبية الفردي (الفئة: ${categoryLabel})`;
+                metaSubtitleElement.innerText = `الاسم الكريم: ${currentSelectedIndividual} | القسم / الإدارة: ${currentSelectedGroup || 'عام'} | تاريخ الاستخراج: ${dateStr}`;
+                document.title = `التقرير_التدريبي_الفردي_${currentSelectedIndividual}`;
+            }
+
+            // Execute system print dialog
+            window.print();
         }
 
         // Page load triggers
