@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحليل الاحتياجات التدريبية - معهد كفر الشيخ العالي للهندسة والتكنولوجيا</title>
+    <title>تحليل الاحتياجات التدريبية - المعهد العالي للهندسة والتكنولوجيا بكفر الشيخ</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -177,37 +177,37 @@
         </button>
     </div>
 
-    <!-- LAYOUT FULLSCREEN TOGGLER (Circular Floating Toggle Button - Dr. Mazen Requirement) -->
+    <!-- LAYOUT FULLSCREEN TOGGLER (Circular Floating Toggle Button) -->
     <button onclick="toggleSidebarAndHeader()" class="fixed bottom-6 left-6 z-40 w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 print-hide" title="عرض كامل الشاشة / لوحة التحكم الموسعة">
         <i class="fa-solid fa-arrows-alt-h text-lg" id="layout-toggle-icon"></i>
     </button>
 
-    <!-- DYNAMIC OFFICIAL PRINT-ONLY HEADER -->
+    <!-- DYNAMIC OFFICIAL PRINT-ONLY HEADER (02.jpg on Right, 00.png on Left) -->
     <div id="print-header-layout" class="hidden flex-row items-center justify-between border-b-4 border-slate-800 pb-4 mb-6 w-full text-slate-900">
-        <!-- Logo Right -->
-        <img src="00.png" alt="شعار المعهد" class="h-20 w-auto object-contain" onerror="this.src='https://placehold.co/120x120/3b82f6/ffffff?text=00.png'">
+        <!-- Logo Right (02.jpg) -->
+        <img src="02.jpg" alt="شعار المعهد" class="h-20 w-auto object-contain" onerror="this.onerror=null; this.src='02.png'; this.onerror=function(){this.src='https://placehold.co/120x120/3b82f6/ffffff?text=02.jpg'}">
         <!-- Center Header Text -->
         <div class="text-center flex-grow px-4">
             <h1 class="text-xl font-extrabold tracking-tight">المعهد العالي للهندسة والتكنولوجيا بكفر الشيخ</h1>
             <h2 id="print-report-main-title" class="text-base font-bold mt-1 text-slate-700">تقرير إحصائي للاحتياجات التدريبية</h2>
             <p id="print-report-meta-subtitle" class="text-xs text-slate-500 mt-1"></p>
         </div>
-        <!-- Logo Left -->
-        <img src="02.png" alt="شعار الجودة" class="h-20 w-auto object-contain" onerror="this.src='https://placehold.co/120x120/10b981/ffffff?text=02.png'">
+        <!-- Logo Left (00.png) -->
+        <img src="00.png" alt="شعار الجودة" class="h-20 w-auto object-contain" onerror="this.onerror=null; this.src='00.jpg'; this.onerror=function(){this.src='https://placehold.co/120x120/10b981/ffffff?text=00.png'}">
     </div>
 
     <!-- MAIN APP WRAPPER -->
     <div class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 md:px-8 flex flex-col gap-6" id="app-content-wrapper">
         
-        <!-- HEADER SECTION -->
+        <!-- HEADER SECTION (02.jpg on Right, 00.png on Left) -->
         <header id="main-app-header" class="glass-panel rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border-b-4 border-blue-500 relative overflow-hidden">
             <!-- Decorative Light-beams -->
             <div class="absolute -right-20 -top-20 w-60 h-60 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
             <div class="absolute -left-20 -bottom-20 w-60 h-60 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
 
             <div class="flex flex-col sm:flex-row items-center gap-5 w-full md:w-auto">
-                <!-- Logo Right (00.png) -->
-                <img src="00.png" alt="شعار المعهد" class="w-20 h-20 object-contain shadow-sm rounded-lg" onerror="this.onerror=null; this.src='https://placehold.co/120x120/3b82f6/ffffff?text=00.png'">
+                <!-- Logo Right (02.jpg) -->
+                <img src="02.jpg" alt="شعار المعهد" class="w-20 h-20 object-contain shadow-sm rounded-lg" onerror="this.onerror=null; this.src='02.png'; this.onerror=function(){this.src='https://placehold.co/120x120/3b82f6/ffffff?text=02.jpg'}">
                 
                 <div class="text-center sm:text-right">
                     <h1 class="text-xl md:text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-900 font-sans">
@@ -223,11 +223,8 @@
                 </div>
             </div>
 
-            <!-- Left Side Logo (02.png) & Fast Actions -->
+            <!-- Left Side Logo (00.png) & Fast Actions -->
             <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto justify-end">
-                <!-- Logo Left (02.png) -->
-                <img src="02.png" alt="شعار الجودة" class="w-16 h-16 object-contain hidden md:block" onerror="this.onerror=null; this.src='https://placehold.co/120x120/10b981/ffffff?text=02.png'">
-                
                 <div class="flex flex-wrap items-center gap-2">
                     <button onclick="fetchFromGoogleSheets()" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold rounded-xl shadow-md hover:scale-105 transition duration-200 flex items-center gap-2 text-xs">
                         <i class="fa-solid fa-arrows-rotate" id="sync-icon"></i>
@@ -238,6 +235,8 @@
                         <span>فتح الشيت الأصلي</span>
                     </a>
                 </div>
+                <!-- Logo Left (00.png) -->
+                <img src="00.png" alt="شعار الجودة" class="w-16 h-16 object-contain hidden md:block" onerror="this.onerror=null; this.src='00.jpg'; this.onerror=function(){this.src='https://placehold.co/120x120/10b981/ffffff?text=00.png'}">
             </div>
         </header>
 
@@ -358,7 +357,7 @@
                         
                         <!-- Collective Selection Input -->
                         <div id="selection-group-wrapper" class="relative mt-1">
-                            <select id="group-select" onchange="onGroupSelectChange()" class="w-full p-3.5 glass-input rounded-xl text-sm font-bold text-slate-700 appearance-none cursor-pointer">
+                            <select id="group-select" onchange="onGroupSelectChange()" class="w-full p-3.5 glass-input rounded-xl text-sm font-bold text-slate-700 appearance-none">
                                 <!-- Dynamically populated -->
                             </select>
                             <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
@@ -374,7 +373,7 @@
                                     <i class="fa-solid fa-magnifying-glass"></i>
                                 </div>
                             </div>
-                            <select id="individual-select" onchange="onIndividualSelectChange()" size="5" class="w-full p-2 glass-input rounded-xl text-sm font-semibold text-slate-700 max-h-40 overflow-y-auto cursor-pointer">
+                            <select id="individual-select" onchange="onIndividualSelectChange()" size="5" class="w-full p-2 glass-input rounded-xl text-sm font-semibold text-slate-700 max-h-40 overflow-y-auto">
                                 <!-- Dynamically populated list of names -->
                             </select>
                         </div>
@@ -382,13 +381,13 @@
                 </div>
 
                 <!-- Info Help Card -->
-                <div class="glass-panel rounded-3xl p-5 border border-emerald-200/50 bg-gradient-to-br from-emerald-50/40 to-sky-50/40 shadow-sm">
+                <div class="glass-panel rounded-3xl p-5 border border-emerald-200/50 bg-gradient-to-br from-emerald-50/40 to-sky-50/40">
                     <h3 class="font-bold text-emerald-800 flex items-center gap-2 text-sm">
                         <i class="fa-solid fa-circle-info text-base"></i>
                         كيف يعمل النظام؟
                     </h3>
                     <p class="text-xs text-slate-600 mt-2 leading-relaxed">
-                        يقوم التطبيق بجلب البيانات المحدثة مباشرة من شيت جوجل، ثم يقوم بفصل البيانات وتفسيرها تلقائياً. عند اختيار <strong class="text-slate-800">"التحليل الجماعي"</strong>، يحسب النظام التكرارات والنسب المئوية لكل دورة تدريبية داخل القسم. وعند اختيار <strong class="text-slate-800">"التحليل الفردي"</strong>، يتم استعراض بطاقة تدريبية كاملة للموظف مع الدورات والمهارات التي اقترحها يدوياً من العمود E.
+                        يقوم التطبيق بجلب البيانات المحدثة مباشرة من شيت جوجل، ثم يقوم بفصل البيانات تلقائياً وفهرستها. عند اختيار <strong class="text-slate-800">"التحليل الجماعي"</strong>، يحسب النظام التكرارات والنسب المئوية لكل دورة تدريبية داخل القسم لتقدير الأكثر احتياجاً. عند اختيار <strong class="text-slate-800">"التحليل الفردي"</strong>، يتم استعراض بطاقة تدريبية كاملة للموظف مع الدورات والمهارات التي اقترحها يدوياً من العمود E.
                     </p>
                 </div>
             </section>
@@ -410,6 +409,30 @@
                 <!-- ACTIVE ANALYSIS BOARD -->
                 <div id="active-analysis-board" class="hidden flex flex-col gap-6">
                     
+                    <!-- HIGHLY PROMINENT REPORT UTILITIES & PRINT HEADER (PDF AND EXCEL BUTTONS FRONT-AND-CENTER) -->
+                    <div class="glass-panel rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 border-r-4 border-red-500 shadow-lg animate-fade-in print-hide">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-2xl">
+                                <i class="fa-solid fa-file-pdf"></i>
+                            </div>
+                            <div>
+                                <h3 id="report-header-title" class="text-base md:text-lg font-black text-slate-800">العرض النشط للتقرير</h3>
+                                <p id="report-header-subtitle" class="text-xs text-slate-500 mt-0.5">جاهز للطباعة الفورية كـ PDF أو تصدير البيانات</p>
+                            </div>
+                        </div>
+                        <!-- Highly Visible Direct Buttons -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="triggerPDFPrint()" class="px-5 py-3 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-extrabold rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-2 text-sm">
+                                <i class="fa-solid fa-print text-base"></i>
+                                <span>طباعة التقرير (PDF)</span>
+                            </button>
+                            <button onclick="exportToCSV()" class="px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-2 text-sm">
+                                <i class="fa-solid fa-file-excel"></i>
+                                <span>تصدير ملف Excel</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- SUMMARY STATS BAR -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden flex flex-col justify-between h-32">
@@ -465,22 +488,9 @@
 
                     <!-- DETAILED LISTS & TABLES -->
                     <div class="glass-panel rounded-3xl p-6 flex flex-col gap-4 shadow-md">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                            <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-table-list text-emerald-600 text-lg"></i>
-                                <h3 class="font-bold text-slate-800 text-base" id="table-section-title">تفاصيل الاحتياجات التدريبية</h3>
-                            </div>
-                            <!-- Export & PDF Print Buttons -->
-                            <div class="flex flex-wrap items-center gap-2">
-                                <button onclick="triggerPDFPrint()" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg text-xs shadow transition duration-200 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-file-pdf"></i>
-                                    <span>طباعة التقرير (PDF)</span>
-                                </button>
-                                <button onclick="exportToCSV()" class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-lg text-xs shadow transition duration-200 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-file-excel"></i>
-                                    <span>تصدير البيانات (CSV)</span>
-                                </button>
-                            </div>
+                        <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+                            <i class="fa-solid fa-table-list text-emerald-600 text-lg"></i>
+                            <h3 class="font-bold text-slate-800 text-base" id="table-section-title">تفاصيل الاحتياجات التدريبية</h3>
                         </div>
 
                         <!-- Table Area (Dynamically Rendered based on context) -->
@@ -731,7 +741,6 @@
                 throw new Error("NetworkError");
             }
             const text = await response.text();
-            // Google redirects to login screen (HTML) if file is locked or restricted
             if (text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html")) {
                 throw new Error("PermissionDeniedOrLoginRequired");
             }
@@ -746,7 +755,6 @@
             showLoading(true, "جاري جلب البيانات من Google Sheets...", "يتم تحميل الأوراق الثلاثة وتحليلها لحظياً...");
             const spreadsheetId = "10pLfzze0lP39S_tb1s_-KcO0biXDTmFCmZ6DAKYBFP4";
             
-            // Supporting both English sheet response format and default Arabic Form sheet response names
             const sheetsConfig = [
                 { id: 1, names: ["Form Responses 1", "ردود النموذج 1", "هيئة التدريس", "Sheet1"] },
                 { id: 2, names: ["Form Responses 2", "ردود النموذج 2", "الهيئة المعاونة", "Sheet2"] },
@@ -754,7 +762,6 @@
             ];
 
             let successCount = 0;
-            let permissionErrorOccurred = false;
 
             for (const sheet of sheetsConfig) {
                 let csvText = "";
@@ -767,9 +774,7 @@
                         loaded = true;
                         break; // Name works, skip the rest
                     } catch (err) {
-                        if (err.message === "PermissionDeniedOrLoginRequired") {
-                            permissionErrorOccurred = true;
-                        }
+                        // Keep looping to next potential sheet name
                     }
                 }
 
@@ -808,9 +813,9 @@
                 <div class="p-6 bg-rose-50 border-2 border-rose-200 rounded-3xl text-right max-w-xl mx-auto flex flex-col gap-4 animate-fade-in shadow-lg">
                     <div class="flex items-center gap-3 text-rose-700">
                         <i class="fa-solid fa-triangle-exclamation text-3xl animate-bounce"></i>
-                        <h3 class="text-lg font-black">تنبيه: فشل جلب البيانات بسبب صلاحيات مشاركة الملف!</h3>
+                        <h3 class="text-lg font-black font-sans">تنبيه: فشل جلب البيانات بسبب صلاحيات مشاركة الملف!</h3>
                     </div>
-                    <p class="text-sm text-slate-600 leading-relaxed">
+                    <p class="text-sm text-slate-600 leading-relaxed font-sans">
                         لم يتمكن التطبيق من قراءة البيانات من الرابط لأن الملف مغلق حالياً أو خاص بمالكه فقط. لحل هذه المشكلة والحصول على المزامنة الفورية "on-the-fly"، يرجى اتباع الخطوات البسيطة التالية:
                     </p>
                     <ol class="list-decimal list-inside text-xs text-slate-700 flex flex-col gap-2 font-semibold">
@@ -843,7 +848,7 @@
                     <i class="fa-solid fa-chart-pie animate-pulse"></i>
                 </div>
                 <h3 class="text-xl font-bold text-slate-700 font-sans">الاستبيان جاهز للتحليل المباشر!</h3>
-                <p class="text-slate-500 max-w-md text-sm">
+                <p class="text-slate-500 max-w-md text-sm font-sans">
                     الرجاء تحديد الفئة المستهدفة ونوع التحليل المناسب لتتمكن من عرض الرسوم البيانية والجداول الإحصائية للأقسام والأفراد فوراً استناداً لبيانات Google Sheets.
                 </p>
             `;
@@ -917,12 +922,19 @@
                 // Collect unique departments
                 let depts = [...new Set(dataList.map(item => item.department))].filter(Boolean);
                 const selectElement = document.getElementById('group-select');
-                selectElement.innerHTML = `<option value="">-- اختر القسم/الإدارة للتصفية مجمعة --</option>`;
+                
+                // Add the default 'ALL' option for full category analysis as requested
+                selectElement.innerHTML = `<option value="ALL">كافة الأقسام والإدارات - تحليل الفئة بالكامل</option>`;
                 
                 depts.forEach(dept => {
                     const count = dataList.filter(item => item.department === dept).length;
                     selectElement.innerHTML += `<option value="${dept}">${dept} (${count} مستجيبين)</option>`;
                 });
+                
+                // Set default to ALL and automatically trigger calculation
+                selectElement.value = "ALL";
+                currentSelectedGroup = "ALL";
+                runAnalysis(); 
             } else {
                 // Collect and sort names
                 let names = dataList.map(item => item.name).filter(Boolean);
@@ -989,13 +1001,19 @@
 
             const fullData = datasets[currentCategory] || [];
             
+            let categoryLabel = "";
+            if (currentCategory === 1) categoryLabel = "أعضاء هيئة التدريس";
+            else if (currentCategory === 2) categoryLabel = "الهيئة المعاونة";
+            else if (currentCategory === 3) categoryLabel = "الجهاز الإداري والمكتبي";
+
             if (currentAnalysisType === 'group') {
                 // 1. COLLECTIVE GROUP ANALYSIS FLOW
                 document.getElementById('nested-members-panel').classList.remove('hidden');
                 document.getElementById('chart-controls-box').classList.remove('hidden');
                 
-                // Filter records belong to chosen department
-                const subset = fullData.filter(item => item.department === currentSelectedGroup);
+                // If "ALL" is selected, take full category data, otherwise filter by selected group
+                const isAllSelected = (currentSelectedGroup === "ALL" || !currentSelectedGroup);
+                const subset = isAllSelected ? fullData : fullData.filter(item => item.department === currentSelectedGroup);
 
                 // Stats Computation
                 const totalParticipants = subset.length;
@@ -1012,15 +1030,26 @@
                 const topCourse = sortedCourses[0] ? sortedCourses[0][0] : 'لا يوجد';
                 const topCourseCount = sortedCourses[0] ? sortedCourses[0][1] : 0;
 
+                // Update New Prominent Report Header Utility Card
+                document.getElementById('report-header-title').innerText = isAllSelected 
+                    ? `تقرير الاحتياجات التدريبية الشامل لكافة منتسبي فئة: ${categoryLabel}` 
+                    : `تقرير الاحتياجات التدريبية المجمع لقسم: ${currentSelectedGroup}`;
+                
+                document.getElementById('report-header-subtitle').innerText = isAllSelected 
+                    ? `الفئة: ${categoryLabel} | عدد المستجيبين الإجمالي: ${totalParticipants}` 
+                    : `الفئة: ${categoryLabel} | قسم: ${currentSelectedGroup} | عدد المستجيبين للقسم: ${totalParticipants}`;
+
                 // Update UI KPI widgets
-                document.getElementById('summary-stat-1-title').innerText = "مستجيبي القسم";
+                document.getElementById('summary-stat-1-title').innerText = isAllSelected ? "مستجيبي الفئة بالكامل" : "مستجيبي القسم";
                 document.getElementById('summary-stat-1-val').className = "text-4xl font-black mt-2 block text-white";
                 document.getElementById('summary-stat-1-val').innerText = totalParticipants;
-                document.getElementById('summary-stat-1-desc').innerText = `إجمالي منتسبي قسم: ${currentSelectedGroup}`;
+                document.getElementById('summary-stat-1-desc').innerText = isAllSelected 
+                    ? `إجمالي المستجيبين في فئة ${categoryLabel}` 
+                    : `إجمالي منتسبي قسم: ${currentSelectedGroup}`;
 
                 document.getElementById('summary-stat-2-title').innerText = "إجمالي طلبات التطوير";
                 document.getElementById('summary-stat-2-val').innerText = totalRequests;
-                document.getElementById('summary-stat-2-desc').innerText = "رغبة تدريبية تم تسجيلها";
+                document.getElementById('summary-stat-2-desc').innerText = "رغبة تدريبية مجمعة مسجلة";
 
                 document.getElementById('summary-stat-3-title').innerText = "الدورة الأكثر إلحاحاً";
                 document.getElementById('summary-stat-3-val').className = "text-base font-bold mt-2 truncate max-w-full block";
@@ -1028,8 +1057,13 @@
                 document.getElementById('summary-stat-3-desc').innerText = `طلبها ${topCourseCount} من أصل ${totalParticipants} مستجيبين`;
 
                 // Set Section Titles
-                document.getElementById('chart-section-title').innerText = `مستويات طلب الدورات بقسم: ${currentSelectedGroup}`;
-                document.getElementById('table-section-title').innerText = `جدول تفصيلي بترتيب احتياج الدورات التدريبية لـ ${currentSelectedGroup}`;
+                document.getElementById('chart-section-title').innerText = isAllSelected 
+                    ? `مستويات طلب الدورات لكافة منتسبي فئة: ${categoryLabel}` 
+                    : `مستويات طلب الدورات بقسم: ${currentSelectedGroup}`;
+                
+                document.getElementById('table-section-title').innerText = isAllSelected 
+                    ? `جدول تفصيلي بترتيب احتياج الدورات التدريبية لكافة منتسبي فئة: ${categoryLabel}` 
+                    : `جدول تفصيلي بترتيب احتياج الدورات التدريبية لـ ${currentSelectedGroup}`;
 
                 // Populate Table
                 let tableHTML = `
@@ -1047,7 +1081,7 @@
                 `;
 
                 if (sortedCourses.length === 0) {
-                    tableHTML += `<tr><td colspan="5" class="p-4 text-center text-slate-400">لا توجد احتياجات مسجلة لهذا القسم حالياً.</td></tr>`;
+                    tableHTML += `<tr><td colspan="5" class="p-4 text-center text-slate-400">لا توجد احتياجات مسجلة حالياً.</td></tr>`;
                 } else {
                     sortedCourses.forEach(([course, count], idx) => {
                         const pct = ((count / totalParticipants) * 100).toFixed(1);
@@ -1083,7 +1117,7 @@
                 document.getElementById('data-table-container').innerHTML = tableHTML;
 
                 // Render Beautiful Interactive Chart
-                renderChart(sortedCourses.map(x => x[0]), sortedCourses.map(x => x[1]), `طلبات القسم (${currentSelectedGroup})`);
+                renderChart(sortedCourses.map(x => x[0]), sortedCourses.map(x => x[1]), isAllSelected ? `طلبات الفئة الشاملة` : `طلبات القسم (${currentSelectedGroup})`);
 
                 // Populate Sub-members Panel
                 populateNestedMembers(subset);
@@ -1099,7 +1133,11 @@
                 if (person) {
                     const totalSelected = person.courses.length;
                     
-                    // Update KPI Widgets for Individual representation
+                    // Update New Prominent Report Header Utility Card
+                    document.getElementById('report-header-title').innerText = `التقرير التدريبي الفردي للعضو: ${person.name}`;
+                    document.getElementById('report-header-subtitle').innerText = `القسم/الإدارة: ${person.department} | الفئة: ${categoryLabel}`;
+
+                    // Update UI KPI widgets for Individual representation
                     document.getElementById('summary-stat-1-title').innerText = "اسم المنتسب";
                     document.getElementById('summary-stat-1-val').className = "text-xl font-bold mt-2 truncate block text-white";
                     document.getElementById('summary-stat-1-val').innerText = person.name;
@@ -1374,7 +1412,8 @@
             const fullData = datasets[currentCategory] || [];
 
             if (currentAnalysisType === 'group') {
-                const subset = fullData.filter(item => item.department === currentSelectedGroup);
+                const isAllSelected = (currentSelectedGroup === "ALL" || !currentSelectedGroup);
+                const subset = isAllSelected ? fullData : fullData.filter(item => item.department === currentSelectedGroup);
                 let courseCounts = {};
                 subset.forEach(item => {
                     item.courses.forEach(c => {
@@ -1383,7 +1422,7 @@
                 });
                 let sortedCourses = Object.entries(courseCounts).sort((a, b) => b[1] - a[1]);
 
-                csvContent += "م,الدورة التدريبية المقترحة,تكرار الطلب بقسم (" + currentSelectedGroup + "),النسبة المئوية للاحتياج\n";
+                csvContent += "م,الدورة التدريبية المقترحة,تكرار الطلب (" + (isAllSelected ? "كامل الفئة" : currentSelectedGroup) + "),النسبة المئوية للاحتياج\n";
                 sortedCourses.forEach(([course, count], idx) => {
                     const pct = ((count / subset.length) * 100).toFixed(1);
                     csvContent += `${idx + 1},"${course.replace(/"/g, '""')}",${count},${pct}%\n`;
@@ -1400,14 +1439,16 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            const fileName = currentAnalysisType === 'group' ? `تحليل_احتياجات_${currentSelectedGroup}.csv` : `دورات_العضو_${currentSelectedIndividual}.csv`;
+            const fileName = currentAnalysisType === 'group' 
+                ? (currentSelectedGroup === "ALL" ? `تقرير_الاحتياجات_الشامل_لكامل_الفئة.csv` : `تحليل_احتياجات_${currentSelectedGroup}.csv`) 
+                : `دورات_العضو_${currentSelectedIndividual}.csv`;
             link.setAttribute("download", fileName);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        // --- NEW DYNAMIC PRINT TO PDF TRIGGER ---
+        // --- DYNAMIC PRINT TO PDF TRIGGER ---
         function triggerPDFPrint() {
             const mainTitleElement = document.getElementById('print-report-main-title');
             const metaSubtitleElement = document.getElementById('print-report-meta-subtitle');
@@ -1425,9 +1466,18 @@
             else if (currentCategory === 3) categoryLabel = "الجهاز الإداري والمكتبي";
 
             if (currentAnalysisType === 'group') {
-                mainTitleElement.innerText = `تقرير الاحتياجات التدريبية المجمع (الفئة: ${categoryLabel})`;
-                metaSubtitleElement.innerText = `القسم / الإدارة: ${currentSelectedGroup} | تاريخ استخراج التقرير: ${dateStr}`;
-                document.title = `تقرير_الاحتياجات_المجمع_${currentSelectedGroup}`;
+                const isAllSelected = (currentSelectedGroup === "ALL" || !currentSelectedGroup);
+                mainTitleElement.innerText = isAllSelected 
+                    ? `تقرير الاحتياجات التدريبية الشامل (الفئة: ${categoryLabel})` 
+                    : `تقرير الاحتياجات التدريبية المجمع (الفئة: ${categoryLabel})`;
+                
+                metaSubtitleElement.innerText = isAllSelected 
+                    ? `يشمل كافة الأقسام والإدارات التابعة للفئة بالكامل | تاريخ استخراج التقرير: ${dateStr}` 
+                    : `القسم / الإدارة: ${currentSelectedGroup} | تاريخ استخراج التقرير: ${dateStr}`;
+                
+                document.title = isAllSelected 
+                    ? `تقرير_الاحتياجات_الشامل_لكامل_الفئة` 
+                    : `تقرير_الاحتياجات_المجمع_${currentSelectedGroup}`;
             } else {
                 mainTitleElement.innerText = `تقرير الاحتياجات التدريبية الفردي (الفئة: ${categoryLabel})`;
                 metaSubtitleElement.innerText = `الاسم الكريم: ${currentSelectedIndividual} | القسم / الإدارة: ${currentSelectedGroup || 'عام'} | تاريخ الاستخراج: ${dateStr}`;
