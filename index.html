@@ -567,7 +567,7 @@
             }
         }
 
-        // Dashboard/Immersive Fullscreen Toggle (Circular Bottom-Right Button)
+        // Dashboard/Immersive Fullscreen Toggle (Circular Floating Toggle Button)
         let isInterfaceHidden = false;
         function toggleSidebarAndHeader() {
             isInterfaceHidden = !isInterfaceHidden;
@@ -820,7 +820,7 @@
                     </p>
                     <ol class="list-decimal list-inside text-xs text-slate-700 flex flex-col gap-2 font-semibold">
                         <li>اضغط على زر <a href="https://docs.google.com/spreadsheets/d/10pLfzze0lP39S_tb1s_-KcO0biXDTmFCmZ6DAKYBFP4/edit?usp=sharing" target="_blank" class="text-blue-600 underline font-bold">فتح الشيت الأصلي</a> لفتح ملف Excel الخاص بك.</li>
-                        <li>من أعلى اليسار، اضغط على زر <strong class="text-slate-900 font-extrabold">"مشاركة" (Share)</strong>.</li>
+                        <li>من أعلى اليسار, اضغط على زر <strong class="text-slate-900 font-extrabold">"مشاركة" (Share)</strong>.</li>
                         <li>تحت بند <strong class="text-slate-900 font-extrabold">"الوصول العام" (General Access)</strong>، قم بتغيير الخيار من <span class="bg-slate-200 px-1 py-0.5 rounded text-slate-800">حصري (Restricted)</span> إلى <strong class="text-emerald-700">"أي شخص لديه الرابط" (Anyone with the link)</strong>.</li>
                         <li>تأكد من اختيار دور <strong class="text-slate-900">"عارض" (Viewer)</strong> أو <strong class="text-slate-900">"محرر" (Editor)</strong> من القائمة المجاورة.</li>
                         <li>اضغط <strong class="text-slate-900">"تم" (Done)</strong> ثم عد إلى هنا واضغط على زر <strong class="text-blue-600 font-bold">"تحديث البيانات المباشرة"</strong> للتجربة.</li>
@@ -865,7 +865,7 @@
             document.getElementById('cat-count-lbl-3').innerText = `${datasets[3].length} مشارك مسجل`;
         }
 
-        // Category selection switch
+        // Category selection switch - Configured to run entire category analysis by default
         function setCategory(catNum) {
             currentCategory = catNum;
 
@@ -884,7 +884,14 @@
 
             // Rebuild department & individual options for this chosen category
             buildSelectors();
-            resetAnalysisDashboard();
+            
+            // Automatically run Analysis for the entire category if group-mode is active (Default state)
+            if (currentAnalysisType === 'group') {
+                currentSelectedGroup = 'ALL';
+                runAnalysis();
+            } else {
+                resetAnalysisDashboard();
+            }
         }
 
         // Set analysis type (Group vs Individual)
@@ -911,7 +918,14 @@
 
             // Populate / Refresh view
             buildSelectors();
-            resetAnalysisDashboard();
+            
+            // If group mode is selected, default to entire category "ALL" and run
+            if (type === 'group') {
+                currentSelectedGroup = 'ALL';
+                runAnalysis();
+            } else {
+                resetAnalysisDashboard();
+            }
         }
 
         // Construct Selection options based on loaded CSV data
@@ -931,10 +945,9 @@
                     selectElement.innerHTML += `<option value="${dept}">${dept} (${count} مستجيبين)</option>`;
                 });
                 
-                // Set default to ALL and automatically trigger calculation
+                // Set default to ALL
                 selectElement.value = "ALL";
                 currentSelectedGroup = "ALL";
-                runAnalysis(); 
             } else {
                 // Collect and sort names
                 let names = dataList.map(item => item.name).filter(Boolean);
